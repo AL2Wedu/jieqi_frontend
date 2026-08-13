@@ -1,8 +1,9 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://0p4qxcmxrpk6"]
 
-[ext_resource type="Script" path="res://scripts/farm_grid.gd" id="1_grid"]
+[ext_resource type="Script" uid="uid://c2jxgci4t8g0r" path="res://scripts/farm_grid.gd" id="1_grid"]
 
-[node name="FarmGrid" type="Control"]
+[node name="FarmGrid" type="Control" unique_id=1919725879]
+layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
@@ -10,17 +11,19 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_grid")
 
-[node name="Center" type="CenterContainer" parent="."]
+[node name="Center" type="CenterContainer" parent="." unique_id=470380047]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
+anchors_preset = -1
+anchor_right = 0.88900006
+anchor_bottom = 0.94000006
+offset_right = -0.08001709
+offset_bottom = -0.20007324
 grow_horizontal = 2
 grow_vertical = 2
 
-[node name="Grid" type="GridContainer" parent="Center"]
+[node name="Grid" type="GridContainer" parent="Center" unique_id=1771919705]
 unique_name_in_owner = true
 layout_mode = 2
+theme_override_constants/h_separation = 8
+theme_override_constants/v_separation = 8
 columns = 4
-theme_override_constants/h_separation = 12
-theme_override_constants/v_separation = 12
