@@ -178,6 +178,7 @@ func _on_crop_picked(seed_item: Dictionary) -> void:
 		_after_operation()
 	else:
 		_npc.set_message(str(res.get("message", "播种失败")))
+		await _after_operation()  # 可能已扣了买种子的金币，失败也刷新
 
 
 func _on_water_pressed(plot_id: String) -> void:
@@ -217,6 +218,7 @@ func _on_fertilize_pressed(plot_id: String) -> void:
 		_after_operation()
 	else:
 		_npc.set_message(str(res.get("message", "施肥失败")))
+		await _after_operation()  # 可能已扣了买肥料的金币，失败也刷新
 
 
 func _on_harvest_pressed(plot_id: String) -> void:
