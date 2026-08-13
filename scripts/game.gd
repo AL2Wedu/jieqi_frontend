@@ -39,6 +39,7 @@ func _ready() -> void:
 	_on_plot_selected(0)
 	_load_from_backend()
 	Backend.check_art_updates()  # 非阻塞：对比版本并缓存素材
+	Backend.ensure_ws()          # 直接进游戏（有本地 token）也要订阅节气广播
 
 
 ## 首屏加载：农场 + 玩家 + 节气。

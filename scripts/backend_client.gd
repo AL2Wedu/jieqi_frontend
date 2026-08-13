@@ -9,6 +9,7 @@ const WS_URL := "ws://127.0.0.1:8000/v1/ws"
 const SAVE_PATH := "user://player.json"
 const ART_VERSION_FILE := "user://art_version.json"
 const REQUEST_TIMEOUT := 10
+const TERM_POLL_SECONDS := 20.0
 
 signal term_changed(payload: Dictionary)
 signal auth_expired
@@ -19,6 +20,7 @@ var current_term: Dictionary = {}
 
 var _socket: WebSocketPeer = null
 var _ws_timer: Timer = null
+var _term_poll_timer: Timer = null
 
 # 素材缓存：当前已下载到的素材版本（决定缓存目录）。
 var _cache_version := ""
@@ -29,6 +31,8 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	load_local()
 	_cache_version = str(_load_json_file(ART_VERSION_FILE).get("version", ""))
+	if token != "":
+		start_term_poll()
 
 
 func _process(_delta: float) -> void:
@@ -140,6 +144,7 @@ func on_login_success(new_token: String, new_player: Dictionary) -> void:
 	player = new_player
 	save_local()
 	start_ws()
+	start_term_poll()
 	_auto_refresh_term()
 	check_art_updates()
 
@@ -346,6 +351,37 @@ func _save_file(path: String, bytes: PackedByteArray) -> void:
 
 
 ## ---------------- 节气 WebSocket ----------------
+
+## 确保 WS 已连接（直接进游戏、跳过登录时也要启动）。
+func ensure_ws() -> void:
+	if _socket != null and _socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+		return
+	start_ws()
+
+
+## 启动节气轮询兜底：WS 广播之外的服务器改动
+## （如管理端 /debug/term/advance、时钟调整）不一定推广播，轮询保证跟上。
+func start_term_poll() -> void:
+	if _term_poll_timer != null and _term_poll_timer.is_inside_tree():
+		return
+	_term_poll_timer = Timer.new()
+	_term_poll_timer.wait_time = TERM_POLL_SECONDS
+	_term_poll_timer.timeout.connect(_poll_term)
+	add_child(_term_poll_timer)
+	_term_poll_timer.start()
+
+
+func _poll_term() -> void:
+	var res: Dictionary = await get_calendar()
+	if res.get("code", -1) != 0:
+		return
+	var data: Dictionary = res["data"]
+	# 节气变了才广播；没变也刷新 current_term（剩余秒数等）
+	var changed := int(data.get("term_index", -1)) != int(current_term.get("term_index", -1))
+	current_term = data
+	if changed:
+		term_changed.emit(current_term)
+
 
 func start_ws() -> void:
 	_stop_ws()
