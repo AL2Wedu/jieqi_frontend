@@ -36,7 +36,7 @@ func _ready() -> void:
 	_crop_picker.picked.connect(_on_crop_picked)
 
 	_refresh_top_bar()
-	_on_plot_selected(0)
+	_grid.select_index(0)  # 同步高亮与逻辑选中（会触发 plot_selected → _on_plot_selected）
 	_load_from_backend()
 	Backend.check_art_updates()  # 非阻塞：对比版本并缓存素材
 	Backend.ensure_ws()          # 直接进游戏（有本地 token）也要订阅节气广播
