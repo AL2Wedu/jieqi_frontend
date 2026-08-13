@@ -208,8 +208,11 @@ func _on_harvest_pressed(plot_id: String) -> void:
 		return
 	var res := await Backend.harvest(plot_id)
 	if res.get("code", -1) == 0:
-		var earned: int = int(res["data"].get("coins_earned", 0))
-		_npc.set_message("收获满满，金币 +%d！" % earned)
+		var data: Dictionary = res["data"]
+		var yield_amt: int = int(data.get("yield", 0))
+		var storage_after: int = int(data.get("storage_after", yield_amt))
+		var crop_name := str(data.get("crop_name", ""))
+		_npc.set_message("收获 %d 株%s，已入收成仓（仓内 %d），可去商店出售" % [yield_amt, crop_name, storage_after])
 		_after_operation()
 	else:
 		_npc.set_message(str(res.get("message", "收割失败")))
