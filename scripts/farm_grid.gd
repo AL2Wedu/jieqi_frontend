@@ -14,12 +14,6 @@ var _plots: Array[FarmPlot] = []
 
 
 func _ready() -> void:
-	# 伪 3D：整片农田轻微倾斜 + 纵向压扁，营造地面透视感。
-	rotation = -0.75
-	scale = Vector2(1.0, 0.9)
-	pivot_offset = size * 0.5
-	resized.connect(func() -> void: pivot_offset = size * 0.5)
-
 	for i in COLUMNS * ROWS:
 		var p := FARM_PLOT.instantiate() as FarmPlot
 		p.plot_clicked.connect(_on_plot_clicked)
