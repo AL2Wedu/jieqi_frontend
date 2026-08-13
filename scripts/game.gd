@@ -90,8 +90,8 @@ func _on_plot_selected(index: int) -> void:
 	_selected_index = index
 	var plot := _grid.get_plot(index)
 
-	if index >= 0 and index < _plots_data.size():
-		var d: Dictionary = _plots_data[index]
+	var d := _plot_data_at(index)
+	if not d.is_empty():
 		var soil: int = int(d.get("soil_quality", 1))
 		var fertility := clampi(20 + soil * 20, 0, 100)
 		var water_level := 0
@@ -113,6 +113,14 @@ func _on_plot_selected(index: int) -> void:
 			_npc.set_message("这块农田还没解锁哦，继续加油吧！")
 		_:
 			_npc.set_message("作物长势不错，记得按时灌溉与施肥～")
+
+
+## 按 idx 查找地块数据（不依赖数组位置；后端 idx 1-20 → 前端 index 0-19）。
+func _plot_data_at(index: int) -> Dictionary:
+	for d in _plots_data:
+		if int(d.get("idx", 0)) - 1 == index:
+			return d
+	return {}
 
 
 func _on_action_selected(action_name: String) -> void:
