@@ -22,7 +22,7 @@ func _ready() -> void:
 
 func _make_button(data: Dictionary) -> Button:
 	var btn := Button.new()
-	btn.custom_minimum_size = Vector2(96, 84)
+	btn.custom_minimum_size = Vector2(88, 84)
 	btn.focus_mode = Control.FOCUS_NONE
 
 	var box := VBoxContainer.new()
