@@ -43,6 +43,8 @@ func _ready() -> void:
 ## 首屏加载：农场 + 玩家 + 节气。
 func _load_from_backend() -> void:
 	var farm := await Backend.get_farm_state()
+	if not is_instance_valid(self):
+		return
 	if farm.get("code", -1) == 0:
 		_plots_data = farm["data"].get("plots", [])
 		_grid.apply_farm_state(_plots_data)
@@ -61,6 +63,8 @@ func _load_from_backend() -> void:
 ## 操作成功后刷新农场与金币。
 func _after_operation() -> void:
 	var farm := await Backend.get_farm_state()
+	if not is_instance_valid(self):
+		return
 	if farm.get("code", -1) == 0:
 		_plots_data = farm["data"].get("plots", [])
 		_grid.apply_farm_state(_plots_data)

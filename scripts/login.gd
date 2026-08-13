@@ -8,12 +8,16 @@ signal back_requested
 @onready var _password_edit: LineEdit = %PasswordEdit
 @onready var _error_label: Label = %ErrorLabel
 
+var _pending_error := ""
+
 
 func _ready() -> void:
 	%LoginButton.pressed.connect(_on_login_pressed)
 	%RegisterButton.pressed.connect(_on_register_pressed)
 	%BackButton.pressed.connect(func() -> void: back_requested.emit())
 	_password_edit.text_submitted.connect(func(_t: String) -> void: _on_login_pressed())
+	if _pending_error != "":
+		_set_error(_pending_error)
 
 
 func _on_login_pressed() -> void:
@@ -60,6 +64,14 @@ func _handle_auth_result(res: Dictionary, is_register: bool) -> void:
 	var data: Dictionary = res["data"]
 	Backend.on_login_success(str(data.get("token", "")), data.get("player", {}))
 	login_success.emit()
+
+
+## 在进入场景前也可调用；未就绪时先缓存，_ready 后展示。
+func show_error(text: String) -> void:
+	if _error_label == null:
+		_pending_error = text
+	else:
+		_set_error(text)
 
 
 func _set_error(text: String) -> void:

@@ -2,15 +2,16 @@ extends Node
 ## 后端 API 客户端（autoload 单例 Backend）。
 ## 封装 HTTP 请求与节气 WebSocket，供各场景 await 调用。
 
-const BASE_URL := "http://192.168.254.26:8000"
+const BASE_URL := "http://127.0.0.1:8000"
 const API := BASE_URL + "/v1"
-const WS_URL := "ws://192.168.254.26:8000/v1/ws"
+const WS_URL := "ws://127.0.0.1:8000/v1/ws"
 
 const SAVE_PATH := "user://player.json"
 const ART_VERSION_FILE := "user://art_version.json"
 const REQUEST_TIMEOUT := 10
 
 signal term_changed(payload: Dictionary)
+signal auth_expired
 
 var token := ""
 var player: Dictionary = {}
@@ -84,7 +85,13 @@ func request(method: String, path: String, body: Variant = {}, authed := true) -
 		# 业务错误也走 JSON 信封
 		var data: Variant = JSON.parse_string(response_body.get_string_from_utf8())
 		if data is Dictionary:
-			return data
+			var result_dict: Dictionary = data
+			# 玩家 token 失效（未登录 / 过期）：清 token 并通知上层重新登录
+			if authed and status == 401:
+				_handle_auth_expired()
+			return result_dict
+		if authed and status == 401:
+			_handle_auth_expired()
 		return { "code": status, "message": "HTTP %d" % status }
 	var parsed: Variant = JSON.parse_string(response_body.get_string_from_utf8())
 	if parsed is Dictionary:
@@ -139,6 +146,14 @@ func on_login_success(new_token: String, new_player: Dictionary) -> void:
 
 func has_token() -> bool:
 	return token != ""
+
+
+## 玩家 token 失效：清空本地登录态并通知上层重新登录。
+func _handle_auth_expired() -> void:
+	if token == "":
+		return
+	logout()
+	auth_expired.emit()
 
 
 func logout() -> void:

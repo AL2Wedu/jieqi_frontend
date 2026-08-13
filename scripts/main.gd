@@ -9,6 +9,7 @@ var _current_scene: Node = null
 
 
 func _ready() -> void:
+	Backend.auth_expired.connect(_on_auth_expired)
 	show_main_menu()
 
 
@@ -18,6 +19,15 @@ func show_main_menu() -> void:
 	menu.start_requested.connect(_on_start_requested)
 	menu.quit_requested.connect(_on_quit_requested)
 	_switch_to(menu)
+
+
+## 玩家 token 失效（401）：切回登录页并提示重新登录。
+func _on_auth_expired() -> void:
+	var login := LOGIN_SCENE.instantiate()
+	login.login_success.connect(_open_game)
+	login.back_requested.connect(show_main_menu)
+	login.show_error("登录已失效，请重新登录")
+	_switch_to(login)
 
 
 ## 开始游戏：有本地 token 直接进游戏，否则先登录。
