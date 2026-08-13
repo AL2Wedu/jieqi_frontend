@@ -46,7 +46,11 @@ func _process(_delta: float) -> void:
 				if packet is PackedByteArray:
 					_handle_ws_message(packet.get_string_from_utf8())
 		WebSocketPeer.STATE_CLOSED:
-			# 断线后 3 秒自动重连
+			# 4401 = token 无效/过期（服务器主动关闭）：停止重连并强制重新登录
+			if _socket.get_close_code() == 4401:
+				_handle_auth_expired()
+				return
+			# 其他断线后 3 秒自动重连
 			if _ws_timer == null:
 				_ws_timer = Timer.new()
 				_ws_timer.one_shot = true
@@ -385,8 +389,10 @@ func _poll_term() -> void:
 
 func start_ws() -> void:
 	_stop_ws()
+	if token == "":
+		return  # 未登录不连 WS
 	_socket = WebSocketPeer.new()
-	var err := _socket.connect_to_url(WS_URL)
+	var err := _socket.connect_to_url(WS_URL + "?token=" + token.uri_encode())
 	if err != OK:
 		push_warning("节气 WebSocket 连接失败: %s" % err)
 
