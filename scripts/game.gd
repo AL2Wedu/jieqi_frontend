@@ -119,17 +119,37 @@ func _on_plot_selected(index: int) -> void:
 
 
 func _on_action_selected(action_name: String) -> void:
+	# 按选中地块状态门控操作
+	var st := _grid.get_plot(_selected_index).state
+	if st == FarmPlot.PlotState.LOCKED:
+		_npc.set_message("这块农田还没解锁哦")
+		return
 	var plot_id := _grid.get_plot_id(_selected_index)
 	match action_name:
 		"播种":
+			if st != FarmPlot.PlotState.EMPTY:
+				_npc.set_message("这块地已经有作物了，先收割或铲除吧")
+				return
 			_on_sow_pressed()
 		"灌溉":
+			if st == FarmPlot.PlotState.EMPTY:
+				_npc.set_message("先播种才能灌溉哦")
+				return
 			_on_water_pressed(plot_id)
 		"施肥":
+			if st == FarmPlot.PlotState.EMPTY:
+				_npc.set_message("先播种才能施肥哦")
+				return
 			_on_fertilize_pressed(plot_id)
 		"除草":
+			if st == FarmPlot.PlotState.EMPTY:
+				_npc.set_message("这里没有作物，无需除草")
+				return
 			_npc.set_message("杂草清除干净啦～")
 		"收割":
+			if st != FarmPlot.PlotState.MATURE:
+				_npc.set_message("作物还没成熟哦")
+				return
 			_on_harvest_pressed(plot_id)
 
 
