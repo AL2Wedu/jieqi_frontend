@@ -226,7 +226,7 @@ func _has_item(item_id: String) -> bool:
 
 
 func _refresh_top_bar() -> void:
-	_top_bar.set_season(SOLAR_TERMS[_term_index])
+	_top_bar.set_season(_term_index)
 	_top_bar.set_date("甲子年 %s" % SOLAR_TERMS[_term_index])
 	_top_bar.set_temperature(8 + _term_index * 2)
 	_top_bar.set_humidity(clampi(70 - _term_index * 5, 10, 90))

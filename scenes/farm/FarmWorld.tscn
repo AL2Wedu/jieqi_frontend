@@ -1,7 +1,7 @@
 [gd_scene format=3 uid="uid://047w2ui8ml2q"]
 
 [ext_resource type="Script" uid="uid://qwn464d41kpx" path="res://scripts/farm_world.gd" id="1_world"]
-[ext_resource type="Texture2D" uid="uid://dyibsqyrbbs8a" path="res://assets/farm/farm_bg_spring.png" id="2_bg"]
+[ext_resource type="Texture2D" uid="uid://deo0kbo3tkgx6" path="res://assets/farm/farm_bg_spring.png" id="2_bg"]
 [ext_resource type="Texture2D" path="res://assets/farm/farm_bg_summer.png" id="3_summer"]
 [ext_resource type="Texture2D" path="res://assets/farm/farm_bg_autumn.png" id="4_autumn"]
 [ext_resource type="Texture2D" path="res://assets/farm/farm_bg_winter.png" id="5_winter"]
