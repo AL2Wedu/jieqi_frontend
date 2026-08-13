@@ -36,8 +36,6 @@ const TERM_TEXTURES: Array[Texture2D] = [
 @onready var _humidity_bar: ProgressBar = %HumidityBar
 @onready var _humidity_label: Label = %HumidityValue
 @onready var _gold_label: Label = %GoldValue
-@onready var _energy_label: Label = %EnergyValue
-@onready var _water_label: Label = %WaterValue
 
 
 ## 设置季节牌贴图（term_index 0-23，按节气切换）。
@@ -60,7 +58,5 @@ func set_humidity(percent: int) -> void:
 	_humidity_label.text = "%d%%" % percent
 
 
-func set_resources(gold: int, energy: String, water: int) -> void:
+func set_gold(gold: int) -> void:
 	_gold_label.text = str(gold)
-	_energy_label.text = energy
-	_water_label.text = str(water)

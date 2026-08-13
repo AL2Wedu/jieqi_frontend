@@ -15,9 +15,6 @@ const CROP_PICKER := preload("res://scenes/CropPicker.tscn")
 @onready var _npc: NpcDialog = $NpcDialog
 
 var _gold := 0
-var _water := 0
-var _energy := 0
-var _energy_max := 60
 var _term_index := 0
 var _selected_index := 0
 var _plots_data: Array = []          # 后端 /farm/state 的 plots 缓存
@@ -254,7 +251,7 @@ func _refresh_top_bar() -> void:
 	_top_bar.set_date("甲子年 %s" % SOLAR_TERMS[_term_index])
 	_top_bar.set_temperature(8 + _term_index * 2)
 	_top_bar.set_humidity(clampi(70 - _term_index * 5, 10, 90))
-	_top_bar.set_resources(_gold, "%d/%d" % [_energy, _energy_max], _water)
+	_top_bar.set_gold(_gold)
 
 
 ## 按 Esc 返回主菜单。

@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://scripts/top_bar.gd" id="1_script"]
 [ext_resource type="Texture2D" path="res://assets/icons/top_plaque.png" id="2_plaque"]
@@ -6,8 +6,6 @@
 [ext_resource type="Texture2D" path="res://assets/icons/weather_cloud.png" id="4_cloud"]
 [ext_resource type="Texture2D" path="res://assets/icons/weather_rain.png" id="5_rain"]
 [ext_resource type="Texture2D" path="res://assets/icons/resource_coin.png" id="6_coin"]
-[ext_resource type="Texture2D" path="res://assets/icons/top_farmer.png" id="7_farmer"]
-[ext_resource type="Texture2D" path="res://assets/icons/resource_water.png" id="8_water"]
 
 [sub_resource type="StyleBoxFlat" id="sb_wood"]
 content_margin_left = 6.0
@@ -194,44 +192,4 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.42, 0.07, 1)
 theme_override_font_sizes/font_size = 18
 text = "12860"
-vertical_alignment = 1
-
-[node name="EnergyRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Resources"]
-layout_mode = 2
-theme_override_constants/separation = 5
-
-[node name="FarmerIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Resources/EnergyRow"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("7_farmer")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="EnergyValue" type="Label" parent="Frame/Panel/Margin/HBox/Resources/EnergyRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
-theme_override_font_sizes/font_size = 18
-text = "36/60"
-vertical_alignment = 1
-
-[node name="WaterRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Resources"]
-layout_mode = 2
-theme_override_constants/separation = 5
-
-[node name="WaterIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Resources/WaterRow"]
-custom_minimum_size = Vector2(24, 24)
-layout_mode = 2
-mouse_filter = 2
-texture = ExtResource("8_water")
-expand_mode = 1
-stretch_mode = 5
-
-[node name="WaterValue" type="Label" parent="Frame/Panel/Margin/HBox/Resources/WaterRow"]
-unique_name_in_owner = true
-layout_mode = 2
-theme_override_colors/font_color = Color(0.2, 0.51, 0.77, 1)
-theme_override_font_sizes/font_size = 18
-text = "1280"
 vertical_alignment = 1
