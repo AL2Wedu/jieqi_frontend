@@ -49,35 +49,65 @@ func get_plot_id(index: int) -> String:
 ## plots 为 /farm/state 返回的 plots 数组（idx 1-20）。
 func apply_farm_state(plots: Array) -> void:
 	_plot_ids.resize(COLUMNS * ROWS)
-	for i in _plot_ids.size():
-		_plot_ids[i] = ""
+	for p in _plots:
+		p.set_pest(false)  # 清除 demo/上一帧残留害虫
+
+	# 先算每格目标 key：locked→"L"，空→"E"，作物→"<slug>|<stage>"
+	var keys: Array[String] = []
+	keys.resize(COLUMNS * ROWS)
+	for i in keys.size():
+		keys[i] = ""
+	var crop_by_index := {}
 	for plot in plots:
 		var d: Dictionary = plot
 		var idx: int = int(d.get("idx", 0)) - 1
 		if idx < 0 or idx >= _plots.size():
 			continue
 		_plot_ids[idx] = str(d.get("plot_id", ""))
-		if bool(d.get("locked", false)):
-			_plots[idx].set_plot_state(FarmPlot.PlotState.LOCKED)
-		elif d.get("crop") == null:
-			_plots[idx].set_plot_state(FarmPlot.PlotState.EMPTY)
-		else:
-			var crop: Dictionary = d["crop"]
+		var crop: Variant = d.get("crop")
+		if crop is Dictionary:
+			var slug := Backend.crop_slug(crop)
 			var stage: int = int(crop.get("stage", 1))
-			var pstate := FarmPlot.PlotState.SPROUT
-			match stage:
-				2:
-					pstate = FarmPlot.PlotState.LEAFY
-				3:
-					pstate = FarmPlot.PlotState.MATURE
-			_plots[idx].set_plot_state(pstate, str(crop.get("name", "")))
-			_load_crop_art(_plots[idx], crop, stage)
+			keys[idx] = "%s|%d" % [slug, stage]
+			crop_by_index[idx] = crop
+		elif bool(d.get("locked", false)):
+			keys[idx] = "L"
+		else:
+			keys[idx] = "E"
+
+	# 应用：内容没变的格子跳过（避免每次刷新重下贴图/闪烁）
+	for i in _plots.size():
+		var plot := _plots[i]
+		var key := keys[i]
+		if key == plot.crop_key:
+			continue
+		plot.crop_key = key
+		plot.reset_crop_art()
+		match key:
+			"L":
+				plot.set_plot_state(FarmPlot.PlotState.LOCKED)
+			"E":
+				plot.set_plot_state(FarmPlot.PlotState.EMPTY)
+			_:
+				var crop: Dictionary = crop_by_index[i]
+				var stage: int = int(crop.get("stage", 1))
+				var pstate := FarmPlot.PlotState.SPROUT
+				match stage:
+					2:
+						pstate = FarmPlot.PlotState.LEAFY
+					3:
+						pstate = FarmPlot.PlotState.MATURE
+				plot.set_plot_state(pstate, str(crop.get("name", "")))
+				_load_crop_art(plot, crop, stage)
 
 
 ## 异步加载作物贴图（走 Backend 本地缓存），加载成功后覆盖文字显示。
+## 下载期间地块内容若已变化（crop_key 对不上）则不应用，防止旧贴图残留。
 func _load_crop_art(plot: FarmPlot, crop: Dictionary, stage: int) -> void:
+	var slug := Backend.crop_slug(crop)
+	var expected_key := "%s|%d" % [slug, stage]
 	var tex := await Backend.get_crop_art_texture(crop, stage, 128)
-	if tex != null and is_instance_valid(plot):
+	if tex != null and is_instance_valid(plot) and plot.crop_key == expected_key:
 		plot.set_crop_texture(tex)
 
 

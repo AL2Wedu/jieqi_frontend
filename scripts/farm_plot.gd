@@ -12,6 +12,7 @@ const COLOR_LOCK_EDGE := Color(0.78, 0.65, 0.45)
 
 var state: int = PlotState.EMPTY
 var is_selected: bool = false
+var crop_key := ""  # 当前作物身份（<slug>|<stage>），用于检测地块内容是否变化
 
 @onready var _crop_label: Label = %CropLabel
 @onready var _lock_icon: TextureRect = %LockIcon
@@ -44,6 +45,7 @@ func set_selected(sel: bool) -> void:
 
 
 ## 显示作物贴图（替代文字）；传 null 时退回文字显示。
+## EMPTY/LOCKED 状态即使有贴图也不显示（防止旧作物贴图残留）。
 func set_crop_texture(tex: Texture2D) -> void:
 	if tex == null:
 		_crop_art.texture = null
@@ -51,8 +53,15 @@ func set_crop_texture(tex: Texture2D) -> void:
 		_crop_label.visible = state != PlotState.LOCKED and state != PlotState.EMPTY
 	else:
 		_crop_art.texture = tex
-		_crop_art.visible = true
-		_crop_label.visible = false
+		var show := state != PlotState.LOCKED and state != PlotState.EMPTY
+		_crop_art.visible = show
+		_crop_label.visible = not show
+
+
+## 清空作物贴图（地块换作物/清空时调用，避免旧贴图残留）。
+func reset_crop_art() -> void:
+	_crop_art.texture = null
+	_refresh()
 
 
 func _refresh() -> void:
