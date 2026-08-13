@@ -1,0 +1,178 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/land_status_panel.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/icons/term_current.svg" id="2_fert"]
+[ext_resource type="Texture2D" path="res://assets/icons/resource_water.svg" id="3_hum"]
+[ext_resource type="Texture2D" path="res://assets/icons/stat_leaf.svg" id="4_health"]
+
+[sub_resource type="StyleBoxFlat" id="sb_panel"]
+content_margin_left = 8.0
+content_margin_top = 6.0
+content_margin_right = 8.0
+content_margin_bottom = 6.0
+bg_color = Color(1, 0.965, 0.871, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+shadow_color = Color(0.31, 0.2, 0.11, 0.3)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="sb_bar_bg"]
+bg_color = Color(0.941, 0.89, 0.753, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 7
+corner_radius_top_right = 7
+corner_radius_bottom_right = 7
+corner_radius_bottom_left = 7
+
+[sub_resource type="StyleBoxFlat" id="sb_fert"]
+bg_color = Color(0.659, 0.784, 0.29, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="sb_hum"]
+bg_color = Color(0.29, 0.616, 0.878, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[sub_resource type="StyleBoxFlat" id="sb_health"]
+bg_color = Color(0.345, 0.722, 0.29, 1)
+corner_radius_top_left = 5
+corner_radius_top_right = 5
+corner_radius_bottom_right = 5
+corner_radius_bottom_left = 5
+
+[node name="LandStatusPanel" type="PanelContainer"]
+anchors_preset = 3
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = -172.0
+offset_right = 272.0
+offset_bottom = -16.0
+grow_vertical = 0
+theme_override_styles/panel = SubResource("sb_panel")
+script = ExtResource("1_script")
+
+[node name="Rows" type="VBoxContainer" parent="."]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="FertilityRow" type="HBoxContainer" parent="Rows"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="FertilityIcon" type="TextureRect" parent="Rows/FertilityRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("2_fert")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="FertilityLabel" type="Label" parent="Rows/FertilityRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 17
+text = "肥力"
+vertical_alignment = 1
+
+[node name="FertilityBar" type="ProgressBar" parent="Rows/FertilityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 16)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("sb_bar_bg")
+theme_override_styles/fill = SubResource("sb_fert")
+value = 60.0
+
+[node name="FertilityValue" type="Label" parent="Rows/FertilityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 15
+text = "60%"
+
+[node name="HumidityRow" type="HBoxContainer" parent="Rows"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HumidityIcon" type="TextureRect" parent="Rows/HumidityRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("3_hum")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HumidityLabel" type="Label" parent="Rows/HumidityRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 17
+text = "湿度"
+vertical_alignment = 1
+
+[node name="HumidityBar" type="ProgressBar" parent="Rows/HumidityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 16)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("sb_bar_bg")
+theme_override_styles/fill = SubResource("sb_hum")
+value = 35.0
+
+[node name="HumidityValue" type="Label" parent="Rows/HumidityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 15
+text = "35%"
+
+[node name="HealthRow" type="HBoxContainer" parent="Rows"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HealthIcon" type="TextureRect" parent="Rows/HealthRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+texture = ExtResource("4_health")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="HealthLabel" type="Label" parent="Rows/HealthRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 17
+text = "健康"
+vertical_alignment = 1
+
+[node name="HealthBar" type="ProgressBar" parent="Rows/HealthRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(110, 16)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("sb_bar_bg")
+theme_override_styles/fill = SubResource("sb_health")
+value = 80.0
+
+[node name="HealthValue" type="Label" parent="Rows/HealthRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 15
+text = "80%"

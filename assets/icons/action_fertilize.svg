@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <rect x="18" y="26" width="28" height="26" rx="5" fill="#A8763E" stroke="#7A5230" stroke-width="3"/>
+  <rect x="24" y="32" width="16" height="16" rx="3" fill="#C8A06B"/>
+  <text x="32" y="44" font-size="14" font-weight="bold" text-anchor="middle" fill="#5A3A1A">粪</text>
+  <path d="M18 30 L14 20 L20 24 Z" fill="#D9C08A" stroke="#A8763E" stroke-width="2"/>
+</svg>

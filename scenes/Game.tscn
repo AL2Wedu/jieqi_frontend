@@ -1,0 +1,43 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="PackedScene" path="res://scenes/farm/FarmWorld.tscn" id="2_world"]
+[ext_resource type="PackedScene" path="res://scenes/farm/TopBar.tscn" id="3_top"]
+[ext_resource type="PackedScene" path="res://scenes/farm/FarmGrid.tscn" id="4_grid"]
+[ext_resource type="PackedScene" path="res://scenes/farm/SolarTermsBar.tscn" id="5_terms"]
+[ext_resource type="PackedScene" path="res://scenes/farm/BottomToolbar.tscn" id="6_toolbar"]
+[ext_resource type="PackedScene" path="res://scenes/farm/LandStatusPanel.tscn" id="7_status"]
+[ext_resource type="PackedScene" path="res://scenes/farm/NpcDialog.tscn" id="8_npc"]
+
+[node name="Game" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_game")
+
+[node name="FarmWorld" parent="." instance=ExtResource("2_world")]
+
+[node name="FarmGrid" parent="." instance=ExtResource("4_grid")]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 80.0
+offset_top = 220.0
+offset_right = -150.0
+offset_bottom = -230.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="TopBar" parent="." instance=ExtResource("3_top")]
+
+[node name="SolarTermsBar" parent="." instance=ExtResource("5_terms")]
+
+[node name="BottomToolbar" parent="." instance=ExtResource("6_toolbar")]
+
+[node name="LandStatusPanel" parent="." instance=ExtResource("7_status")]
+
+[node name="NpcDialog" parent="." instance=ExtResource("8_npc")]

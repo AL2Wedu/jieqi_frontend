@@ -1,0 +1,236 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://scripts/top_bar.gd" id="1_script"]
+[ext_resource type="Texture2D" path="res://assets/icons/top_plaque.png" id="2_plaque"]
+[ext_resource type="Texture2D" path="res://assets/icons/weather_sun.png" id="3_sun"]
+[ext_resource type="Texture2D" path="res://assets/icons/weather_cloud.png" id="4_cloud"]
+[ext_resource type="Texture2D" path="res://assets/icons/weather_rain.png" id="5_rain"]
+[ext_resource type="Texture2D" path="res://assets/icons/resource_coin.png" id="6_coin"]
+[ext_resource type="Texture2D" path="res://assets/icons/top_farmer.png" id="7_farmer"]
+[ext_resource type="Texture2D" path="res://assets/icons/resource_water.png" id="8_water"]
+
+[sub_resource type="StyleBoxFlat" id="sb_wood"]
+content_margin_left = 6.0
+content_margin_top = 6.0
+content_margin_right = 6.0
+content_margin_bottom = 6.0
+bg_color = Color(0.659, 0.463, 0.243, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.478, 0.322, 0.188, 1)
+corner_radius_top_left = 22
+corner_radius_top_right = 22
+corner_radius_bottom_right = 22
+corner_radius_bottom_left = 22
+shadow_color = Color(0.31, 0.2, 0.11, 0.35)
+shadow_size = 6
+
+[sub_resource type="StyleBoxFlat" id="sb_cream"]
+bg_color = Color(1, 0.965, 0.871, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="sb_bar_bg"]
+bg_color = Color(0.941, 0.89, 0.753, 1)
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+
+[sub_resource type="StyleBoxFlat" id="sb_bar_fill"]
+bg_color = Color(0.29, 0.616, 0.878, 1)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+
+[node name="TopBar" type="PanelContainer"]
+anchors_preset = 10
+anchor_right = 1.0
+offset_bottom = 176.0
+grow_horizontal = 2
+theme_override_styles/panel = SubResource("sb_wood")
+script = ExtResource("1_script")
+
+[node name="Frame" type="MarginContainer" parent="."]
+layout_mode = 2
+theme_override_constants/margin_left = 6
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 6
+theme_override_constants/margin_bottom = 6
+
+[node name="Panel" type="PanelContainer" parent="Frame"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("sb_cream")
+
+[node name="Margin" type="MarginContainer" parent="Frame/Panel"]
+layout_mode = 2
+theme_override_constants/margin_left = 8
+theme_override_constants/margin_top = 6
+theme_override_constants/margin_right = 8
+theme_override_constants/margin_bottom = 6
+
+[node name="HBox" type="HBoxContainer" parent="Frame/Panel/Margin"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="SeasonPlaque" type="TextureRect" parent="Frame/Panel/Margin/HBox"]
+custom_minimum_size = Vector2(104, 0)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("2_plaque")
+expand_mode = 1
+stretch_mode = 0
+
+[node name="Center" type="VBoxContainer" parent="Frame/Panel/Margin/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="DateLabel" type="Label" parent="Frame/Panel/Margin/HBox/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 21
+text = "甲子年 立春"
+
+[node name="WeatherRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Center"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="SunIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Center/WeatherRow"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("3_sun")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CloudIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Center/WeatherRow"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("4_cloud")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="RainIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Center/WeatherRow"]
+custom_minimum_size = Vector2(30, 30)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("5_rain")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="TempLabel" type="Label" parent="Frame/Panel/Margin/HBox/Center/WeatherRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 18
+text = "8°C"
+vertical_alignment = 1
+
+[node name="HumidityRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Center"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="HumidityLabel" type="Label" parent="Frame/Panel/Margin/HBox/Center/HumidityRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 16
+text = "湿度"
+
+[node name="HumidityBar" type="ProgressBar" parent="Frame/Panel/Margin/HBox/Center/HumidityRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 16)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("sb_bar_bg")
+theme_override_styles/fill = SubResource("sb_bar_fill")
+value = 70.0
+
+[node name="HumidityValue" type="Label" parent="Frame/Panel/Margin/HBox/Center/HumidityRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.29, 0.616, 0.878, 1)
+theme_override_font_sizes/font_size = 16
+text = "70%"
+
+[node name="Resources" type="VBoxContainer" parent="Frame/Panel/Margin/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="GoldRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Resources"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="CoinIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Resources/GoldRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("6_coin")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="GoldValue" type="Label" parent="Frame/Panel/Margin/HBox/Resources/GoldRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.42, 0.07, 1)
+theme_override_font_sizes/font_size = 18
+text = "12860"
+vertical_alignment = 1
+
+[node name="EnergyRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Resources"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="FarmerIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Resources/EnergyRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("7_farmer")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="EnergyValue" type="Label" parent="Frame/Panel/Margin/HBox/Resources/EnergyRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 18
+text = "36/60"
+vertical_alignment = 1
+
+[node name="WaterRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Resources"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="WaterIcon" type="TextureRect" parent="Frame/Panel/Margin/HBox/Resources/WaterRow"]
+custom_minimum_size = Vector2(24, 24)
+layout_mode = 2
+mouse_filter = 2
+texture = ExtResource("8_water")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="WaterValue" type="Label" parent="Frame/Panel/Margin/HBox/Resources/WaterRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.2, 0.51, 0.77, 1)
+theme_override_font_sizes/font_size = 18
+text = "1280"
+vertical_alignment = 1
