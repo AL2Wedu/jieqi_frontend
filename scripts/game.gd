@@ -7,6 +7,7 @@ const SOLAR_TERMS := ["立春", "雨水", "惊蛰", "春分", "清明", "谷雨"
 const CROP_PICKER := preload("res://scenes/CropPicker.tscn")
 
 @onready var _top_bar: TopBar = $TopBar
+@onready var _world: FarmWorld = $FarmWorld
 @onready var _grid: FarmGrid = $FarmGrid
 @onready var _terms: SolarTermsBar = $SolarTermsBar
 @onready var _toolbar: BottomToolbar = $BottomToolbar
@@ -79,6 +80,7 @@ func _apply_term(data: Dictionary) -> void:
 	var ti: int = int(data.get("term_index", 1)) - 1  # 后端 1-24 → 前端 0-23
 	_term_index = clampi(ti, 0, SOLAR_TERMS.size() - 1)
 	_terms.set_term(_term_index)
+	_world.set_season_by_term(_term_index)
 	_refresh_top_bar()
 
 

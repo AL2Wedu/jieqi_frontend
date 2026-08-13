@@ -2,16 +2,16 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dyibsqyrbbs8a"
-path="res://.godot/imported/farm_bg.png-77c3a54456d9c8ddb1b6b68b6d2f5206.ctex"
+uid="uid://lhoo4g8l64e"
+path="res://.godot/imported/farm_bg_autumn.png-237bc83a040f1f56f3a71a5593319de1.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/farm/farm_bg.png"
-dest_files=["res://.godot/imported/farm_bg.png-77c3a54456d9c8ddb1b6b68b6d2f5206.ctex"]
+source_file="res://assets/farm/farm_bg_autumn.png"
+dest_files=["res://.godot/imported/farm_bg_autumn.png-237bc83a040f1f56f3a71a5593319de1.ctex"]
 
 [params]
 
