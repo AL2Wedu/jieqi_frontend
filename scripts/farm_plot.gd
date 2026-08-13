@@ -18,6 +18,7 @@ var is_selected: bool = false
 @onready var _pest_bubble: PanelContainer = %PestBubble
 @onready var _soil: TextureRect = %Soil
 @onready var _frame: TextureRect = %Frame
+@onready var _crop_art: TextureRect = %CropArt
 
 
 func _ready() -> void:
@@ -42,10 +43,28 @@ func set_selected(sel: bool) -> void:
 	_refresh()
 
 
+## 显示作物贴图（替代文字）；传 null 时退回文字显示。
+func set_crop_texture(tex: Texture2D) -> void:
+	if tex == null:
+		_crop_art.texture = null
+		_crop_art.visible = false
+		_crop_label.visible = state != PlotState.LOCKED and state != PlotState.EMPTY
+	else:
+		_crop_art.texture = tex
+		_crop_art.visible = true
+		_crop_label.visible = false
+
+
 func _refresh() -> void:
 	_soil.visible = state != PlotState.LOCKED
 	_lock_icon.visible = state == PlotState.LOCKED
-	_crop_label.visible = state != PlotState.LOCKED and state != PlotState.EMPTY
+	var has_crop := state != PlotState.LOCKED and state != PlotState.EMPTY
+	if _crop_art.texture == null:
+		_crop_art.visible = false
+		_crop_label.visible = has_crop
+	else:
+		_crop_art.visible = has_crop
+		_crop_label.visible = false
 
 	var normal := StyleBoxFlat.new()
 	normal.set_corner_radius_all(14)

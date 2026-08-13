@@ -1,9 +1,8 @@
 extends Control
-## 根场景：负责在「主菜单」与「游戏」之间切换。
-##
-## 后续若要加读档、加载过渡、全局状态等，都可以挂在这里统一管理。
+## 根场景：负责在「主菜单 / 登录 / 游戏」之间切换。
 
 const MAIN_MENU_SCENE: PackedScene = preload("res://scenes/MainMenu.tscn")
+const LOGIN_SCENE: PackedScene = preload("res://scenes/Login.tscn")
 const GAME_SCENE: PackedScene = preload("res://scenes/Game.tscn")
 
 var _current_scene: Node = null
@@ -21,8 +20,18 @@ func show_main_menu() -> void:
 	_switch_to(menu)
 
 
-## 开始游戏：切换到游戏场景。
+## 开始游戏：有本地 token 直接进游戏，否则先登录。
 func _on_start_requested() -> void:
+	if Backend.has_token():
+		_open_game()
+	else:
+		var login := LOGIN_SCENE.instantiate()
+		login.login_success.connect(_open_game)
+		login.back_requested.connect(show_main_menu)
+		_switch_to(login)
+
+
+func _open_game() -> void:
 	var game := GAME_SCENE.instantiate()
 	game.back_to_menu_requested.connect(show_main_menu)
 	_switch_to(game)

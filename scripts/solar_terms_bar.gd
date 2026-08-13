@@ -1,9 +1,7 @@
 class_name SolarTermsBar
 extends Control
 ## 右侧紧凑节气进度条：左侧显示当前节气名，右侧竖轨道一次展示 3 个节点
-## （上一个 / 当前 / 下一个），点击上下节点切换节气。
-
-signal term_selected(term_name: String)
+## （上一个 / 当前 / 下一个）。只读展示，节气由后端权威驱动，用户不可调整。
 
 const SOLAR_TERMS := [
 	"立春", "雨水", "惊蛰", "春分", "清明", "谷雨",
@@ -27,7 +25,7 @@ var selected := 0
 
 
 func _ready() -> void:
-	mouse_filter = MOUSE_FILTER_STOP
+	mouse_filter = MOUSE_FILTER_IGNORE
 
 
 func _season_of(index: int) -> int:
@@ -78,32 +76,14 @@ func _draw() -> void:
 	draw_circle(cur, 20, Color(1, 0.85, 0.35, 0.3))
 	draw_circle(cur, DOT_R + 2, Color(1, 0.88, 0.45, 1))
 
-	# 左右箭头提示
-	_draw_text_outlined(Vector2(cx - 9, track_top - 16), "▲", 14,
-			Color(0.5, 0.4, 0.25, 0.85), Color(1, 1, 1, 0.6))
-	_draw_text_outlined(Vector2(cx - 9, track_bottom + 2), "▼", 14,
-			Color(0.5, 0.4, 0.25, 0.85), Color(1, 1, 1, 0.6))
-
 	# 当前节气名（进度条左侧）
 	_draw_text_outlined(Vector2(14, cy + 8), SOLAR_TERMS[selected], NAME_FONT_SIZE,
 			Color(0.32, 0.24, 0.13), Color(1, 0.98, 0.9, 0.9))
 
 
-## 选中节气并广播。
-func select(index: int) -> void:
+## 展示指定节气（仅由外部驱动，用户不可点选）。index 为 0-23。
+func set_term(index: int) -> void:
 	if index < 0 or index >= SOLAR_TERMS.size():
 		return
 	selected = index
 	queue_redraw()
-	term_selected.emit(SOLAR_TERMS[selected])
-
-
-func _gui_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		var p: Vector2 = event.position
-		if _dot_pos(0).distance_to(p) < 18.0:
-			return
-		if _dot_pos(-1).distance_to(p) < 18.0:
-			select(selected - 1)
-		elif _dot_pos(1).distance_to(p) < 18.0:
-			select(selected + 1)

@@ -5,11 +5,11 @@ extends PanelContainer
 signal action_selected(action_name: String)
 
 const ACTIONS := [
-	{ "name": "播种", "icon": "res://assets/icons/action_seed.svg" },
-	{ "name": "灌溉", "icon": "res://assets/icons/action_irrigate.svg" },
-	{ "name": "施肥", "icon": "res://assets/icons/action_fertilize.svg" },
-	{ "name": "除草", "icon": "res://assets/icons/action_weed.svg" },
-	{ "name": "收割", "icon": "res://assets/icons/action_harvest.svg" },
+	{ "name": "播种", "icon": "res://assets/icons/action_seed.png" },
+	{ "name": "灌溉", "icon": "res://assets/icons/action_irrigate.png" },
+	{ "name": "施肥", "icon": "res://assets/icons/action_fertilize.png" },
+	{ "name": "除草", "icon": "res://assets/icons/action_weed.png" },
+	{ "name": "收割", "icon": "res://assets/icons/action_harvest.png" },
 ]
 
 @onready var _row: HBoxContainer = %Row
@@ -35,7 +35,7 @@ func _make_button(data: Dictionary) -> Button:
 
 	var icon := TextureRect.new()
 	icon.texture = load(data["icon"]) as Texture2D
-	icon.custom_minimum_size = Vector2(40, 40)
+	icon.custom_minimum_size = Vector2(48, 48)
 	icon.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	icon.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
 	icon.size_flags_horizontal = Control.SIZE_SHRINK_CENTER

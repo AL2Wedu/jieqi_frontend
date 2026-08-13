@@ -8,6 +8,10 @@
 
 config_version=5
 
+[autoload]
+
+Backend="*res://scripts/backend_client.gd"
+
 [application]
 
 config/name="节气造物主"
