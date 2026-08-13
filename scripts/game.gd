@@ -166,6 +166,7 @@ func _on_crop_picked(seed_item: Dictionary) -> void:
 	var crop_id := str(effect.get("crop_id", ""))
 	var item_id := str(seed_item.get("item_id", ""))
 	if crop_id == "" or item_id == "":
+		_npc.set_message("这个种子无法播种")
 		return
 	if not await _has_item(item_id):
 		var buy_res := await Backend.buy(item_id, 1)
