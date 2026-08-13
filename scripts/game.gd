@@ -199,11 +199,13 @@ func _on_fertilize_pressed(plot_id: String) -> void:
 		return
 	if _fertilizer_item_id == "":
 		var shop := await Backend.get_shop()
-		if shop.get("code", -1) == 0:
-			for item in shop["data"]["items"]:
-				if str(item.get("code", "")) == "fertilizer":
-					_fertilizer_item_id = str(item.get("item_id", ""))
-					break
+		if shop.get("code", -1) != 0:
+			_npc.set_message("无法连接服务器，获取商店失败")
+			return
+		for item in shop["data"]["items"]:
+			if str(item.get("code", "")) == "fertilizer":
+				_fertilizer_item_id = str(item.get("item_id", ""))
+				break
 	if _fertilizer_item_id == "":
 		_npc.set_message("商店里没有肥料")
 		return
