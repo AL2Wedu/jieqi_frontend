@@ -42,6 +42,22 @@ corner_radius_top_right = 14
 corner_radius_bottom_right = 14
 corner_radius_bottom_left = 14
 
+[sub_resource type="StyleBoxFlat" id="sb_list"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 0.965, 0.871, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
+
 [node name="StoragePanel" type="Control"]
 visible = false
 layout_mode = 3
@@ -101,7 +117,10 @@ unique_name_in_owner = true
 custom_minimum_size = Vector2(0, 420)
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_colors/font_color = Color(0.3, 0.2, 0.1, 1)
+theme_override_styles/panel = SubResource("sb_list")
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_colors/selected_bg_color = Color(0.941, 0.89, 0.753, 1)
+theme_override_colors/selected_font_color = Color(0.36, 0.25, 0.13, 1)
 theme_override_font_sizes/font_size = 20
 
 [node name="Hint" type="Label" parent="Center/Panel/VBox"]

@@ -43,8 +43,7 @@ func open() -> void:
 		var d: Dictionary = it
 		var name := str(d.get("name", ""))
 		var qty: int = int(d.get("quantity", 0))
-		var price: int = int(d.get("sell_price", 0))
-		_item_list.add_item("%s × %d    售价 %d 金币/株" % [name, qty, price])
+		_item_list.add_item("%s × %d" % [name, qty])
 
 
 ## 点击遮罩关闭。

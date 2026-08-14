@@ -48,22 +48,17 @@ func _ready() -> void:
 	_style_shop_hotspot()
 	_shop_hotspot.pressed.connect(_open_shop)
 
-	# 收成仓入口（顶栏下方右侧，图标按钮，透明背景）
+	# 收成仓入口（顶栏下方右侧，图标按钮，透明背景，无悬停框）
 	_storage_button.icon = load("res://assets/icons/storage_silo.png")
 	_storage_button.expand_icon = true
 	_storage_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_storage_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	_storage_button.add_theme_stylebox_override("hover", StyleBoxEmpty.new())
 	_storage_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
 	_storage_button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
-	var st_hover := StyleBoxFlat.new()
-	st_hover.bg_color = Color(1, 1, 0.6, 0.12)
-	st_hover.set_corner_radius_all(16)
-	st_hover.border_width_left = 3
-	st_hover.border_width_top = 3
-	st_hover.border_width_right = 3
-	st_hover.border_width_bottom = 3
-	st_hover.border_color = Color(0.9, 0.75, 0.3, 0.6)
-	_storage_button.add_theme_stylebox_override("hover", st_hover)
+	_storage_button.pivot_offset = _storage_button.size / 2.0
+	_storage_button.button_down.connect(func() -> void: _storage_button.scale = Vector2(0.9, 0.9))
+	_storage_button.button_up.connect(func() -> void: _storage_button.scale = Vector2.ONE)
 	_storage_button.pressed.connect(_open_storage)
 
 	# 收成仓查看面板
