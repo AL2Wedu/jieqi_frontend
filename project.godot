@@ -26,7 +26,8 @@ Backend="*res://scripts/backend_client.gd"
 window/size/viewport_width=720
 window/size/viewport_height=1280
 window/stretch/mode="canvas_items"
-; expand：无黑边铺满（多出的空间由锚点布局自然延伸），竖屏游戏首选
+; expand：任意屏幕比例自适应铺满（无黑边）。
+; 配合全锚点相对布局 + 背景 keep_aspect_covered，任何设备都不变形。
 window/stretch/aspect="expand"
 ; 手机锁定竖屏（0=横屏 1=竖屏 5=跟随竖屏传感器）
 window/handheld/orientation=1

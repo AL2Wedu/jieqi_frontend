@@ -22,9 +22,11 @@ script = ExtResource("1_game")
 
 [node name="ShopHotspot" type="Button" parent="."]
 unique_name_in_owner = true
-offset_left = 492.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -228.0
 offset_top = 220.0
-offset_right = 672.0
+offset_right = -48.0
 offset_bottom = 470.0
 focus_mode = 0
 tooltip_text = "商店"
@@ -32,9 +34,11 @@ mouse_default_cursor_shape = 2
 
 [node name="StorageButton" type="Button" parent="."]
 unique_name_in_owner = true
-offset_left = 596.0
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -124.0
 offset_top = 196.0
-offset_right = 700.0
+offset_right = -20.0
 offset_bottom = 300.0
 focus_mode = 0
 tooltip_text = "收成仓"

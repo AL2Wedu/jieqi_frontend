@@ -21,13 +21,13 @@ shadow_color = Color(0.31, 0.2, 0.11, 0.35)
 shadow_size = 6
 
 [node name="BottomToolbar" type="PanelContainer"]
-anchors_preset = 12
+anchor_left = 0.5
 anchor_top = 1.0
-anchor_right = 1.0
+anchor_right = 0.5
 anchor_bottom = 1.0
-offset_left = 110.0
+offset_left = -250.0
 offset_top = -330.0
-offset_right = -110.0
+offset_right = 250.0
 offset_bottom = -180.0
 grow_horizontal = 2
 grow_vertical = 0
