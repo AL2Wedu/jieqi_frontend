@@ -479,7 +479,8 @@ func _on_crop_picked(seed_item: Dictionary) -> void:
 	if not await _has_item(item_id):
 		var buy_res := await Backend.buy(item_id, 1)
 		if buy_res.get("code", -1) != 0:
-			_npc.set_message("金币不足，买不了种子")
+			# 后端区分金币不足(22003)/库存不足(22006)等，直接展示其错误文案
+			_npc.set_message(str(buy_res.get("message", "购买种子失败")))
 			return
 	var res := await Backend.sow(plot_id, crop_id)
 	if res.get("code", -1) == 0:
@@ -521,7 +522,8 @@ func _on_fertilize_pressed(plot_id: String) -> void:
 	if not await _has_item(_fertilizer_item_id):
 		var buy_res := await Backend.buy(_fertilizer_item_id, 1)
 		if buy_res.get("code", -1) != 0:
-			_npc.set_message("金币不足，买不了肥料")
+			# 后端区分金币不足(22003)/库存不足(22006)等，直接展示其错误文案
+			_npc.set_message(str(buy_res.get("message", "购买肥料失败")))
 			return
 	var res := await Backend.use_item(_fertilizer_item_id, plot_id)
 	if res.get("code", -1) == 0:
