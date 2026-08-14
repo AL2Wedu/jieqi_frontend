@@ -4,9 +4,13 @@ extends Control
 signal start_requested
 signal quit_requested
 
+const SETTINGS_PANEL := preload("res://scenes/SettingsPanel.tscn")
+
 @onready var _start_button: Button = $CenterContainer/VBoxContainer/StartButton
 @onready var _settings_button: Button = $CenterContainer/VBoxContainer/SettingsButton
 @onready var _quit_button: Button = $CenterContainer/VBoxContainer/QuitButton
+
+var _settings_panel: Control = null
 
 
 func _ready() -> void:
@@ -14,7 +18,12 @@ func _ready() -> void:
 	_settings_button.pressed.connect(_on_settings_pressed)
 	_quit_button.pressed.connect(func() -> void: quit_requested.emit())
 
+	_settings_panel = SETTINGS_PANEL.instantiate()
+	add_child(_settings_panel)
+	_settings_panel.visible = false
+	_settings_panel.close_requested.connect(func() -> void: _settings_panel.visible = false)
 
-## 设置界面尚未实现，先打桩。
+
+## 打开设置面板。
 func _on_settings_pressed() -> void:
-	print("[主菜单] 设置按钮被点击（占位）")
+	_settings_panel.open()

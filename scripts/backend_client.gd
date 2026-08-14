@@ -10,9 +10,11 @@ var ws_url := ""
 
 const SAVE_PATH := "user://player.json"
 const ART_VERSION_FILE := "user://art_version.json"
+const SETTINGS_FILE := "user://settings.json"
 const REQUEST_TIMEOUT := 10
 const TERM_POLL_SECONDS := 20.0
 const WS_PING_SECONDS := 30.0
+const APP_VERSION := "1.0.0"
 
 signal term_changed(payload: Dictionary)
 ## 资源权威变更：管理后台编辑玩家资产 → 强制刷新 /player/me 成功后发出，携带最新玩家数据。
@@ -28,6 +30,9 @@ signal auth_expired
 var token := ""
 var player: Dictionary = {}
 var current_term: Dictionary = {}
+
+# 本地设置：服务器地址 / 音乐 / 音效（设置面板可改，持久化到 user://settings.json）。
+var settings: Dictionary = {}
 
 var _socket: WebSocketPeer = null
 var _ws_timer: Timer = null
@@ -97,7 +102,11 @@ const ERROR_MESSAGES := {
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	load_settings()
+	# 优先级：环境变量 JIEQI_SERVER > 本地设置里的服务器地址 > 硬编码默认
 	var env := OS.get_environment("JIEQI_SERVER")
+	if env == "":
+		env = str(settings.get("server", ""))
 	if env != "":
 		base_url = env
 	api = base_url + "/v1"
@@ -699,6 +708,51 @@ func load_local() -> void:
 		var data: Dictionary = parsed
 		token = str(data.get("token", ""))
 		player = data.get("player", {})
+
+
+## ---------------- 设置（user://settings.json） ----------------
+
+func load_settings() -> void:
+	settings = _load_json_file(SETTINGS_FILE)
+
+
+func save_settings() -> void:
+	_save_json_file(SETTINGS_FILE, settings)
+
+
+## 保存新的服务器地址并立即生效（重建 api/ws_url，重连 WS）。
+func set_server(address: String) -> void:
+	address = address.strip_edges()
+	if address == "":
+		return
+	if not address.begins_with("http://") and not address.begins_with("https://"):
+		address = "http://" + address
+	base_url = address.trim_suffix("/")
+	api = base_url + "/v1"
+	ws_url = base_url.replace("http", "ws") + "/v1/ws"
+	settings["server"] = base_url
+	save_settings()
+	# 已在登录态：重连到新服务器的 WS
+	if token != "":
+		start_ws()
+
+
+func set_music_enabled(on: bool) -> void:
+	settings["music"] = on
+	save_settings()
+
+
+func set_sfx_enabled(on: bool) -> void:
+	settings["sfx"] = on
+	save_settings()
+
+
+func is_music_enabled() -> bool:
+	return bool(settings.get("music", true))
+
+
+func is_sfx_enabled() -> bool:
+	return bool(settings.get("sfx", true))
 
 
 func _save_to_file(data: Dictionary) -> void:
