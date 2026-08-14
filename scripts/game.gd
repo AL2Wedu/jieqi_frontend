@@ -5,6 +5,7 @@ signal back_to_menu_requested
 
 const SOLAR_TERMS := ["立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"]
 const CROP_PICKER := preload("res://scenes/CropPicker.tscn")
+const SHOP := preload("res://scenes/Shop.tscn")
 
 @onready var _top_bar: TopBar = $TopBar
 @onready var _world: FarmWorld = $FarmWorld
@@ -13,6 +14,7 @@ const CROP_PICKER := preload("res://scenes/CropPicker.tscn")
 @onready var _toolbar: BottomToolbar = $BottomToolbar
 @onready var _status: LandStatusPanel = $LandStatusPanel
 @onready var _npc: NpcDialog = $NpcDialog
+@onready var _shop_hotspot: Button = %ShopHotspot
 
 var _gold := 0
 var _term_index := 0
@@ -20,6 +22,7 @@ var _selected_index := 0
 var _plots_data: Array = []          # 后端 /farm/state 的 plots 缓存
 var _fertilizer_item_id := ""
 var _crop_picker: Control = null
+var _shop: Control = null
 
 
 func _ready() -> void:
@@ -31,6 +34,16 @@ func _ready() -> void:
 	_crop_picker = CROP_PICKER.instantiate()
 	add_child(_crop_picker)
 	_crop_picker.picked.connect(_on_crop_picked)
+
+	# 商店占位面板
+	_shop = SHOP.instantiate()
+	add_child(_shop)
+	_shop.visible = false
+	_shop.close_requested.connect(func() -> void: _shop.visible = false)
+
+	# 商店入口热区（透明，悬停高亮）
+	_style_shop_hotspot()
+	_shop_hotspot.pressed.connect(_open_shop)
 
 	_refresh_top_bar()
 	_grid.select_index(0)  # 同步高亮与逻辑选中（会触发 plot_selected → _on_plot_selected）
@@ -84,6 +97,25 @@ func _apply_term(data: Dictionary) -> void:
 
 func _on_term_changed(payload: Dictionary) -> void:
 	_apply_term(payload)
+
+
+func _open_shop() -> void:
+	_shop.visible = true
+
+
+## 商店入口热区透明化，悬停轻微高亮提示可点。
+func _style_shop_hotspot() -> void:
+	for state in ["normal", "hover", "pressed", "focus"]:
+		_shop_hotspot.add_theme_stylebox_override(state, StyleBoxEmpty.new())
+	var hover := StyleBoxFlat.new()
+	hover.bg_color = Color(1, 1, 0.6, 0.12)
+	hover.set_corner_radius_all(16)
+	hover.border_width_left = 3
+	hover.border_width_top = 3
+	hover.border_width_right = 3
+	hover.border_width_bottom = 3
+	hover.border_color = Color(0.9, 0.75, 0.3, 0.6)
+	_shop_hotspot.add_theme_stylebox_override("hover", hover)
 
 
 func _on_plot_selected(index: int) -> void:
@@ -267,7 +299,13 @@ func _refresh_top_bar() -> void:
 	_top_bar.set_gold(_gold)
 
 
-## 按 Esc 返回主菜单。
+## 按 Esc：先关商店/播种弹窗，再返回主菜单。
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		if _shop != null and _shop.visible:
+			_shop.visible = false
+			return
+		if _crop_picker != null and _crop_picker.visible:
+			_crop_picker.visible = false
+			return
 		back_to_menu_requested.emit()
