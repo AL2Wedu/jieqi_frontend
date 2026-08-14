@@ -446,11 +446,11 @@ func _on_action_selected(action_name: String) -> void:
 				_npc.set_message("先播种才能施肥哦")
 				return
 			_on_fertilize_pressed(plot_id)
-		"铲除":
-			if st == FarmPlot.PlotState.EMPTY or st == FarmPlot.PlotState.LOCKED:
-				_npc.set_message("这块地没有作物，无需铲除")
+		"除草":
+			if not _grid.get_plot(_selected_index).weeded:
+				_npc.set_message("这里没有杂草，无需除草")
 				return
-			_on_clear_pressed(plot_id)
+			_on_weed_clear_pressed(plot_id)
 		"收割":
 			if st != FarmPlot.PlotState.MATURE:
 				_npc.set_message("作物还没成熟哦")
@@ -534,6 +534,19 @@ func _on_fertilize_pressed(plot_id: String) -> void:
 		await _after_operation()  # 可能已扣了买肥料的金币，失败也刷新
 
 
+## 清除选中地块杂草（后端 POST /farm/plots/{id}/weed-clear）。
+func _on_weed_clear_pressed(plot_id: String) -> void:
+	if plot_id == "":
+		_npc.set_message("未连接服务器，无法除草")
+		return
+	var res := await Backend.clear_weed(plot_id)
+	if res.get("code", -1) == 0:
+		_npc.set_message("杂草清除干净啦～")
+		_after_operation()
+	else:
+		_npc.set_message(str(res.get("message", "除草失败")))
+
+
 ## 铲除地块作物（后端 POST /farm/plots/{id}/clear）。
 func _on_clear_pressed(plot_id: String) -> void:
 	if plot_id == "":
@@ -586,12 +599,25 @@ func _refresh_top_bar() -> void:
 	_top_bar.set_remaining_sec(_term_remaining)
 
 
-## 按 Esc：先关最上层弹窗，再返回主菜单。
+## 按 Esc / 安卓返回：先关最上层弹窗，再返回主菜单。
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		# 优先关最上层弹窗（返回 true = 本次返回键已消费，不继续退）
 		for panel in [_ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
 				_inventory_panel, _storage_panel, _shop, _crop_picker]:
 			if panel != null and panel.visible:
 				panel.visible = false
 				return
-		back_to_menu_requested.emit()
+		# 无弹窗可关：交由 Main 处理返回主菜单（避免同帧双处理用 call_deferred）
+		get_viewport().set_input_as_handled()
+		back_to_menu_requested.emit.call_deferred()
+
+
+## 安卓返回键：系统通知通路。返回 true = 已消费（有面板可关），false = 需退到主菜单。
+func handle_android_back() -> bool:
+	for panel in [_ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
+			_inventory_panel, _storage_panel, _shop, _crop_picker]:
+		if panel != null and panel.visible:
+			panel.visible = false
+			return true
+	return false

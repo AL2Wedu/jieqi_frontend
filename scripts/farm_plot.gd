@@ -12,6 +12,7 @@ const COLOR_LOCK_EDGE := Color(0.78, 0.65, 0.45)
 
 var state: int = PlotState.EMPTY
 var is_selected: bool = false
+var weeded: bool = false    # 是否有杂草（作物生长减速）
 var crop_key := ""  # 当前作物身份（<slug>|<stage>），用于检测地块内容是否变化
 
 @onready var _crop_label: Label = %CropLabel
@@ -44,6 +45,7 @@ func set_pest(has_pest: bool) -> void:
 
 ## 是否显示杂草（该地块作物生长减速）。
 func set_weeded(has_weed: bool) -> void:
+	weeded = has_weed
 	_weed_icon.visible = has_weed
 
 

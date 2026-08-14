@@ -42,3 +42,20 @@ func _style_press(btn: Button) -> void:
 ## 打开设置面板。
 func _on_settings_pressed() -> void:
 	_settings_panel.open()
+
+
+## 设置面板开着时，Esc / 安卓返回先关面板。
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		if _settings_panel != null and _settings_panel.visible:
+			get_viewport().set_input_as_handled()
+			_settings_panel.visible = false
+			return
+
+
+## 安卓返回键（系统通知通路）：设置面板开着先关面板；否则返回 true 表示主菜单将退出。
+func handle_android_back() -> bool:
+	if _settings_panel != null and _settings_panel.visible:
+		_settings_panel.visible = false
+		return true
+	return false

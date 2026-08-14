@@ -67,3 +67,16 @@ func show_error(text: String) -> void:
 
 func _set_error(text: String) -> void:
 	_error_label.text = text
+
+
+## Esc / 安卓返回键：返回主菜单。
+func _unhandled_input(event: InputEvent) -> void:
+	if event.is_action_pressed("ui_cancel"):
+		get_viewport().set_input_as_handled()
+		back_requested.emit.call_deferred()
+
+
+## 安卓返回键（系统通知通路）：登录页无面板，返回主菜单。
+func handle_android_back() -> bool:
+	back_requested.emit.call_deferred()
+	return true

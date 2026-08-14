@@ -132,9 +132,19 @@ func _crop_suitable(win: Dictionary, term_index: int) -> bool:
 
 func _load_icon(btn: Button, quote: Dictionary) -> void:
 	var tex := await Backend.get_seed_art_texture(quote, 64)
-	if tex != null and is_instance_valid(btn):
+	if tex == null or not is_instance_valid(btn):
+		return
+	if "icon_max_width" in btn:
+		# Godot 4.2+：直接用引擎属性限制图标宽度
 		btn.icon = tex
 		btn.icon_max_width = 40
+		return
+	# 旧版引擎没有 icon_max_width：预缩放图标到 <= 40 宽，效果一致
+	var img := tex.get_image()
+	if img.get_width() > 40:
+		var scale := 40.0 / img.get_width()
+		img.resize(roundi(img.get_width() * scale), roundi(img.get_height() * scale), Image.INTERPOLATE_BILINEAR)
+	btn.icon = ImageTexture.create_from_image(img)
 
 
 func _close() -> void:

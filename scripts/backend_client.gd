@@ -4,7 +4,7 @@ extends Node
 
 ## 服务器地址：桌面调试默认本机。真机（Android）请改成电脑/服务器的局域网 IP，
 ## 或用环境变量 JIEQI_SERVER 覆盖（adb / 导出时注入）。
-var base_url := "http://192.168.254.38:8000"
+var base_url := "http://127.0.0.1:8000"
 var api := ""
 var ws_url := ""
 
@@ -335,6 +335,11 @@ func use_item(item_id: String, plot_id: String) -> Dictionary:
 
 func clear_plot(plot_id: String) -> Dictionary:
 	return await request("POST", "/farm/plots/%s/clear" % plot_id)
+
+
+## 清除单个地块杂草（POST /farm/plots/{id}/weed-clear）。
+func clear_weed(plot_id: String) -> Dictionary:
+	return await request("POST", "/farm/plots/%s/weed-clear" % plot_id)
 
 
 ## ---------------- 虫害 ----------------
