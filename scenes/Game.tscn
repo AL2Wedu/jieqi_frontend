@@ -74,42 +74,26 @@ offset_bottom = 47.76001
 grow_horizontal = 1
 grow_vertical = 1
 
-[node name="BottomToolbar" parent="." unique_id=980371035 instance=ExtResource("6_toolbar")]
-layout_mode = 0
+[node name="BottomBar" type="Control" parent="." unique_id=3071508422]
+layout_mode = 1
+anchors_preset = 12
 anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 219.0
-offset_top = 1242.0
-offset_right = 719.0
-offset_bottom = 1392.0
-grow_horizontal = 1
-grow_vertical = 1
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_top = -340.0
+grow_horizontal = 2
+grow_vertical = 0
+mouse_filter = 2
 
-[node name="LandStatusPanel" parent="." unique_id=2063660561 instance=ExtResource("7_status")]
-layout_mode = 0
-anchors_preset = 0
-anchor_top = 0.0
-anchor_bottom = 0.0
-offset_left = -2.0
-offset_top = 1367.0
-offset_right = 258.0
-offset_bottom = 1523.0
-grow_vertical = 1
+[node name="BottomToolbar" parent="BottomBar" unique_id=980371035 instance=ExtResource("6_toolbar")]
+layout_mode = 1
 
-[node name="NpcDialog" parent="." unique_id=693379889 instance=ExtResource("8_npc")]
-layout_mode = 0
-anchors_preset = 0
-anchor_left = 0.0
-anchor_top = 0.0
-anchor_right = 0.0
-anchor_bottom = 0.0
-offset_left = 372.0
-offset_top = 1395.0
-offset_right = 716.0
-offset_bottom = 1524.0
-grow_vertical = 1
+[node name="LandStatusPanel" parent="BottomBar" unique_id=2063660561 instance=ExtResource("7_status")]
+layout_mode = 1
+
+[node name="NpcDialog" parent="BottomBar" unique_id=693379889 instance=ExtResource("8_npc")]
+layout_mode = 1
 
 [node name="FeatureRail" type="VBoxContainer" parent="." unique_id=257763436]
 unique_name_in_owner = true
