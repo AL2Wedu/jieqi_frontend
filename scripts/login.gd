@@ -47,18 +47,9 @@ func _on_register_pressed() -> void:
 
 func _handle_auth_result(res: Dictionary, is_register: bool) -> void:
 	if res.get("code", -1) != 0:
-		var error_code := str(res.get("error_code", ""))
-		var message := str(res.get("message", ""))
-		if error_code == "USER_EXISTS":
-			_set_error("该名字已被注册，试试登录")
-		elif error_code == "BAD_CREDENTIALS":
-			_set_error("密码错误")
-		elif error_code == "USER_BANNED":
-			_set_error("账号已被封禁")
-		elif res.get("code", -1) == -1:
-			_set_error(message if message != "" else "无法连接服务器")
-		else:
-			_set_error(message if message != "" else "操作失败，请重试")
+		# 统一走 Backend 文案层：USER_EXISTS/BAD_CREDENTIALS/USER_BANNED 等均有映射，
+		# 未命中的（含网络失败 -1）回退后端 message 或兜底文案。
+		_set_error(Backend.friendly_message(res, "操作失败，请重试"))
 		return
 
 	var data: Dictionary = res["data"]

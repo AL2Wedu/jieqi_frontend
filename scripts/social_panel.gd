@@ -141,7 +141,7 @@ func _on_add_pressed() -> void:
 	if not is_instance_valid(self):
 		return
 	if res.get("code", -1) != 0:
-		_show_hint(str(res.get("message", "发送失败")))
+		_show_hint(Backend.friendly_message(res, "发送失败"))
 		return
 	_show_hint("好友申请已发送")
 	await _refresh()
@@ -152,7 +152,7 @@ func _remove_friend(player_id: String) -> void:
 	if not is_instance_valid(self):
 		return
 	if res.get("code", -1) != 0:
-		_show_hint(str(res.get("message", "删除失败")))
+		_show_hint(Backend.friendly_message(res, "删除失败"))
 		return
 	await _refresh()
 
@@ -162,7 +162,7 @@ func _accept_friend(player_id: String) -> void:
 	if not is_instance_valid(self):
 		return
 	if res.get("code", -1) != 0:
-		_show_hint(str(res.get("message", "操作失败")))
+		_show_hint(Backend.friendly_message(res, "操作失败"))
 		return
 	await _refresh()
 
@@ -172,7 +172,7 @@ func _reject_friend(player_id: String) -> void:
 	if not is_instance_valid(self):
 		return
 	if res.get("code", -1) != 0:
-		_show_hint(str(res.get("message", "操作失败")))
+		_show_hint(Backend.friendly_message(res, "操作失败"))
 		return
 	await _refresh()
 

@@ -116,7 +116,7 @@ func _sell_amount(quantity: int) -> void:
 		return
 	if res.get("code", -1) != 0:
 		_hint.visible = true
-		_hint.text = str(res.get("message", "出售失败"))
+		_hint.text = Backend.friendly_message(res, "出售失败")
 		return
 	_hint.text = ""
 	assets_changed.emit()

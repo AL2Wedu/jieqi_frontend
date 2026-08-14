@@ -30,7 +30,7 @@ func _refresh() -> void:
 		return
 	if res.get("code", -1) != 0:
 		_hint.visible = true
-		_hint.text = "无法连接服务器：" + str(res.get("message", "未知错误"))
+		_hint.text = Backend.friendly_message(res, "加载失败")
 		return
 	_clear_list()
 	var items: Array = res["data"].get("items", [])
@@ -156,7 +156,7 @@ func _claim(achievement_id: String) -> void:
 		return
 	if res.get("code", -1) != 0:
 		_hint.visible = true
-		_hint.text = str(res.get("message", "领取失败"))
+		_hint.text = Backend.friendly_message(res, "领取失败")
 		return
 	_hint.text = ""
 	assets_changed.emit()

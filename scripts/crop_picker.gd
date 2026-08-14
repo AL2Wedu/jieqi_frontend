@@ -24,7 +24,7 @@ func open() -> void:
 	_hint.visible = false
 	if res.get("code", -1) != 0:
 		_hint.visible = true
-		_hint.text = "获取商店失败：" + str(res.get("message", "未知错误"))
+		_hint.text = Backend.friendly_message(res, "获取商店失败")
 		return
 	var data: Dictionary = res["data"]
 	var term_index: int = int(Backend.current_term.get("term_index", 1))  # 后端 1-24

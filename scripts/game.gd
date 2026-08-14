@@ -281,7 +281,7 @@ func _on_drive_away_confirmed(pest_id: String, plot_id: String) -> void:
 		var destroyed: bool = bool(res["data"].get("destroyed", false))
 		_toast("驱赶成功！" if not destroyed else "来晚了，作物已被害虫毁坏")
 	else:
-		_toast(str(res.get("message", "驱赶失败")))
+		_toast(Backend.friendly_message(res, "驱赶失败"))
 	await _after_operation()
 
 
@@ -479,15 +479,15 @@ func _on_crop_picked(seed_item: Dictionary) -> void:
 	if not await _has_item(item_id):
 		var buy_res := await Backend.buy(item_id, 1)
 		if buy_res.get("code", -1) != 0:
-			# 后端区分金币不足(22003)/库存不足(22006)等，直接展示其错误文案
-			_npc.set_message(str(buy_res.get("message", "购买种子失败")))
+			# 后端区分金币不足(22003)/库存不足(22006)/商品不存在(22002)等，统一走文案层
+			_npc.set_message(Backend.friendly_message(buy_res, "购买种子失败"))
 			return
 	var res := await Backend.sow(plot_id, crop_id)
 	if res.get("code", -1) == 0:
 		_npc.set_message("播种成功，记得按时浇水施肥～")
 		_after_operation()
 	else:
-		_npc.set_message(str(res.get("message", "播种失败")))
+		_npc.set_message(Backend.friendly_message(res, "播种失败"))
 		await _after_operation()  # 可能已扣了买种子的金币，失败也刷新
 
 
@@ -500,7 +500,7 @@ func _on_water_pressed(plot_id: String) -> void:
 		_npc.set_message("浇灌完成，土壤湿润起来啦～")
 		_after_operation()
 	else:
-		_npc.set_message(str(res.get("message", "浇水失败")))
+		_npc.set_message(Backend.friendly_message(res, "浇水失败"))
 
 
 func _on_fertilize_pressed(plot_id: String) -> void:
@@ -522,15 +522,15 @@ func _on_fertilize_pressed(plot_id: String) -> void:
 	if not await _has_item(_fertilizer_item_id):
 		var buy_res := await Backend.buy(_fertilizer_item_id, 1)
 		if buy_res.get("code", -1) != 0:
-			# 后端区分金币不足(22003)/库存不足(22006)等，直接展示其错误文案
-			_npc.set_message(str(buy_res.get("message", "购买肥料失败")))
+			# 后端区分金币不足(22003)/库存不足(22006)/商品不存在(22002)等，统一走文案层
+			_npc.set_message(Backend.friendly_message(buy_res, "购买肥料失败"))
 			return
 	var res := await Backend.use_item(_fertilizer_item_id, plot_id)
 	if res.get("code", -1) == 0:
 		_npc.set_message("施过肥了，作物更有劲啦～")
 		_after_operation()
 	else:
-		_npc.set_message(str(res.get("message", "施肥失败")))
+		_npc.set_message(Backend.friendly_message(res, "施肥失败"))
 		await _after_operation()  # 可能已扣了买肥料的金币，失败也刷新
 
 
@@ -544,7 +544,7 @@ func _on_clear_pressed(plot_id: String) -> void:
 		_npc.set_message("已铲除，土地空出来了")
 		_after_operation()
 	else:
-		_npc.set_message(str(res.get("message", "铲除失败")))
+		_npc.set_message(Backend.friendly_message(res, "铲除失败"))
 
 
 func _on_harvest_pressed(plot_id: String) -> void:
@@ -560,7 +560,7 @@ func _on_harvest_pressed(plot_id: String) -> void:
 		_npc.set_message("收获 %d 株%s，已入收成仓（仓内 %d），可去商店出售" % [yield_amt, crop_name, storage_after])
 		_after_operation()
 	else:
-		_npc.set_message(str(res.get("message", "收割失败")))
+		_npc.set_message(Backend.friendly_message(res, "收割失败"))
 
 
 ## 背包是否已有某道具（数量 > 0）。

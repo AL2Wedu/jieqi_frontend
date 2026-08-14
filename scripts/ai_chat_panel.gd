@@ -81,7 +81,7 @@ func _on_send_pressed() -> void:
 	_send.disabled = false
 	_hint.visible = false
 	if res.get("code", -1) != 0:
-		_append_line("[color=#d84a2a]（错误：%s）[/color]" % str(res.get("message", "AI 不可用")))
+		_append_line("[color=#d84a2a]（错误：%s）[/color]" % Backend.friendly_message(res, "AI 不可用"))
 		return
 	_append_reply(res["data"])
 	await _load_usage()

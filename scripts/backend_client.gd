@@ -38,6 +38,62 @@ var _term_poll_timer: Timer = null
 var _cache_version := ""
 var _art_checking := false
 
+## 玩家可达错误码 → 用户友好文案（统一错误文案层）。
+## 命中映射用前端文案（不依赖后端 message 的中文质量）；
+## 未命中回退后端 message；再兜底调用方 fallback。
+## 与后端 API.md 第 11 章错误码全表对应；管理端/调试码（3xxxx、22005 等）不进表。
+const ERROR_MESSAGES := {
+	# 1xxxx 通用
+	"UNAUTHORIZED": "登录已失效，请重新登录",
+	"INVALID_PARAMS": "参数不合法，请检查输入",
+	# 2xxxx 账号 / 农场 / 商店
+	"USER_EXISTS": "该名字已被注册，试试登录",
+	"USER_NOT_FOUND": "账号不存在",
+	"BAD_CREDENTIALS": "密码错误",
+	"USER_BANNED": "账号已被封禁",
+	"FARM_NOT_FOUND": "农场数据不存在",
+	"PLOT_NOT_FOUND": "这块地不存在或未解锁",
+	"PLOT_OCCUPIED": "这块地已经有作物了",
+	"CROP_NOT_AVAILABLE": "当前节气不宜种植这种作物",
+	"PLOT_EMPTY": "这块地没有作物",
+	"CROP_NOT_FOUND": "没有找到这种作物",
+	"SEED_NOT_FOUND": "找不到对应的种子，先买种子吧",
+	"NOT_ENOUGH_ITEM": "道具不足，先去商店购买吧",
+	"CROP_LOCKED": "这种作物还没解锁，继续升级吧",
+	"NOT_ENOUGH_COINS": "金币不足",
+	"ITEM_NOT_FOUND": "道具或商品不存在",
+	"NOT_ENOUGH_STOCK": "商店缺货了，稍后再来",
+	"NOT_ENOUGH_CROP": "收成仓里数量不足",
+	"CROP_NOT_MATURE": "作物还没成熟，再等等吧",
+	"EFFECT_NOT_SUPPORTED": "这个道具的效果还不支持使用",
+	"TERM_NOT_FOUND": "节气数据不存在",
+	# 24xxx-27xxx 扩展玩法
+	"AI_DISABLED": "节气助手未启用",
+	"AI_NOT_CONFIGURED": "节气助手还没配置好，请稍后再试",
+	"AI_UPSTREAM_ERROR": "AI 服务暂时不可用，请稍后再试",
+	"QUEST_NOT_FOUND": "任务不存在",
+	"QUEST_NOT_COMPLETE": "任务还没完成，继续加油",
+	"QUEST_ALREADY_CLAIMED": "任务奖励已经领过了",
+	"ACHIEVEMENT_NOT_FOUND": "成就不存在",
+	"ACHIEVEMENT_NOT_COMPLETE": "成就还没达成",
+	"ACHIEVEMENT_ALREADY_CLAIMED": "成就奖励已经领过了",
+	"ALREADY_FRIENDS": "你们已经是好友了",
+	"REQUEST_EXISTS": "好友申请已发送，等待对方处理",
+	"REQUEST_NOT_FOUND": "申请不存在或已处理",
+	"NOT_YOUR_REQUEST": "这不是发给你的申请",
+	"FRIEND_NOT_FOUND": "好友关系不存在",
+	# 28xxx 虫害 / 素材
+	"ART_NOT_FOUND": "素材加载失败",
+	"PEST_DISABLED": "虫害系统未启用",
+	"PEST_BUSY": "已有进行中的虫害",
+	"PEST_NO_TARGET": "没有可寄生的作物",
+	"PEST_NOT_FOUND": "虫害事件不存在或已结束",
+	"PEST_RESULT_TOO_FAST": "提交太快了，稍后再试",
+	"PEST_TARGET_NOT_FOUND": "寄生目标不存在或已处理",
+	# 9xxxx 系统
+	"INTERNAL_ERROR": "服务器开小差了，请稍后再试",
+}
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -118,8 +174,9 @@ func request(method: String, path: String, body: Variant = {}, authed := true) -
 		var data: Variant = JSON.parse_string(response_body.get_string_from_utf8())
 		if data is Dictionary:
 			var result_dict: Dictionary = data
-			# 玩家 token 失效（未登录 / 过期）：清 token 并通知上层重新登录
-			if authed and status == 401:
+			# 玩家 token 失效（未登录 / 过期，HTTP 401）或账号被封禁（HTTP 403 + USER_BANNED）：
+			# 清 token 并通知上层重新登录
+			if authed and _is_auth_failure(status, result_dict):
 				_handle_auth_expired()
 			return result_dict
 		if authed and status == 401:
@@ -129,6 +186,26 @@ func request(method: String, path: String, body: Variant = {}, authed := true) -
 	if parsed is Dictionary:
 		return parsed
 	return { "code": -1, "message": "响应解析失败" }
+
+
+## 是否鉴权失效：401 任意（未登录/过期）；403 仅当 error_code=USER_BANNED
+## （封禁是 403 而非 401，其余 403 如 ADMIN_DISABLED/DEBUG_DISABLED 不踢出）。
+func _is_auth_failure(status: int, body: Dictionary) -> bool:
+	if status == 401:
+		return true
+	return status == 403 and str(body.get("error_code", "")) == "USER_BANNED"
+
+
+## 统一错误文案：优先 ERROR_MESSAGES 映射表（前端文案），
+## 未命中用后端 message，再兜底 fallback。
+func friendly_message(res: Dictionary, fallback: String) -> String:
+	var mapped: String = ERROR_MESSAGES.get(str(res.get("error_code", "")), "")
+	if mapped != "":
+		return mapped
+	var msg := str(res.get("message", ""))
+	if msg != "":
+		return msg
+	return fallback
 
 
 ## 下载图片二进制（失败返回空数组）。
