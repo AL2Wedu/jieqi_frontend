@@ -194,13 +194,14 @@ func logout() -> void:
 	player = {}
 	current_term = {}
 	_stop_ws()
+	_stop_term_poll()
 	_save_to_file({})
 
 
 ## ---------------- 数据读取 ----------------
 
 func get_calendar() -> Dictionary:
-	return await request("GET", "/calendar/current", {}, false)
+	return await request("GET", "/calendar/current")
 
 
 func get_player_me() -> Dictionary:
@@ -495,6 +496,14 @@ func start_term_poll() -> void:
 	_term_poll_timer.timeout.connect(_poll_term)
 	add_child(_term_poll_timer)
 	_term_poll_timer.start()
+
+
+## 停止节气轮询（登出/token 失效时调用，避免空转 401）。
+func _stop_term_poll() -> void:
+	if _term_poll_timer != null:
+		_term_poll_timer.stop()
+		_term_poll_timer.queue_free()
+		_term_poll_timer = null
 
 
 func _poll_term() -> void:

@@ -26,7 +26,7 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("2_bg")
 expand_mode = 1
-stretch_mode = 7
+stretch_mode = 6
 
 [node name="SeasonLayer" type="TextureRect" parent="."]
 layout_mode = 1
@@ -37,4 +37,4 @@ grow_horizontal = 2
 grow_vertical = 2
 mouse_filter = 2
 expand_mode = 1
-stretch_mode = 7
+stretch_mode = 6
