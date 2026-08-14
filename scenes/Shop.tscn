@@ -255,10 +255,11 @@ layout_mode = 2
 theme_override_constants/separation = 18
 
 [node name="Title" type="Label" parent="LoadingOverlay/Center/Card/VBox" unique_id=618711603]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
 theme_override_font_sizes/font_size = 36
-text = "商店"
+text = "农 场"
 horizontal_alignment = 1
 
 [node name="Sub" type="Label" parent="LoadingOverlay/Center/Card/VBox" unique_id=1666630832]
@@ -266,7 +267,7 @@ unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.93, 0.8, 1)
 theme_override_font_sizes/font_size = 18
-text = "正在进入…"
+text = "正在加载"
 horizontal_alignment = 1
 
 [node name="Bar" type="ProgressBar" parent="LoadingOverlay/Center/Card/VBox" unique_id=616695509]
@@ -276,8 +277,9 @@ layout_mode = 2
 size_flags_horizontal = 3
 theme_override_styles/background = SubResource("sb_load_bar_bg")
 theme_override_styles/fill = SubResource("sb_load_stripe")
+show_percentage = false
 
-[node name="Pct" type="Label" parent="LoadingOverlay/Center/Card/VBox" unique_id=290769963]
+[node name="Pct" type="Label" parent="LoadingOverlay/Center/Card/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)

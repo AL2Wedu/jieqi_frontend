@@ -602,9 +602,12 @@ func _refresh_top_bar() -> void:
 ## 按 Esc / 安卓返回：先关最上层弹窗，再返回主菜单。
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
-		# 优先关最上层弹窗（返回 true = 本次返回键已消费，不继续退）
+		# 商店特殊：带加载动画退出
+		if _shop != null and _shop.visible:
+			_shop.close()
+			return
 		for panel in [_ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
-				_inventory_panel, _storage_panel, _shop, _crop_picker]:
+				_inventory_panel, _storage_panel, _crop_picker]:
 			if panel != null and panel.visible:
 				panel.visible = false
 				return
@@ -615,8 +618,12 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## 安卓返回键：系统通知通路。返回 true = 已消费（有面板可关），false = 需退到主菜单。
 func handle_android_back() -> bool:
+	# 商店特殊：带加载动画退出
+	if _shop != null and _shop.visible:
+		_shop.close()
+		return true
 	for panel in [_ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
-			_inventory_panel, _storage_panel, _shop, _crop_picker]:
+			_inventory_panel, _storage_panel, _crop_picker]:
 		if panel != null and panel.visible:
 			panel.visible = false
 			return true
