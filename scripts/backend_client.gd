@@ -2,9 +2,11 @@ extends Node
 ## 后端 API 客户端（autoload 单例 Backend）。
 ## 封装 HTTP 请求与节气 WebSocket，供各场景 await 调用。
 
-const BASE_URL := "http://127.0.0.1:8000"
-const API := BASE_URL + "/v1"
-const WS_URL := "ws://127.0.0.1:8000/v1/ws"
+## 服务器地址：桌面调试默认本机。真机（Android）请改成电脑/服务器的局域网 IP，
+## 或用环境变量 JIEQI_SERVER 覆盖（adb / 导出时注入）。
+var base_url := "http://127.0.0.1:8000"
+var api := ""
+var ws_url := ""
 
 const SAVE_PATH := "user://player.json"
 const ART_VERSION_FILE := "user://art_version.json"
@@ -29,6 +31,11 @@ var _art_checking := false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	var env := OS.get_environment("JIEQI_SERVER")
+	if env != "":
+		base_url = env
+	api = base_url + "/v1"
+	ws_url = base_url.replace("http", "ws") + "/v1/ws"
 	load_local()
 	_cache_version = str(_load_json_file(ART_VERSION_FILE).get("version", ""))
 	if token != "":
@@ -68,7 +75,7 @@ func request(method: String, path: String, body: Variant = {}, authed := true) -
 	var req := HTTPRequest.new()
 	req.timeout = REQUEST_TIMEOUT
 	add_child(req)
-	var url := API + path
+	var url := api + path
 	var headers := PackedStringArray(["Content-Type: application/json"])
 	if authed and token != "":
 		headers.append("Authorization: Bearer %s" % token)
@@ -249,7 +256,7 @@ func get_art_texture(slug: String, name: String, w: int) -> Texture2D:
 		var tex := _texture_from_file(cache_path)
 		if tex != null:
 			return tex
-	var url := "%s/v1/art/crops/%s/%s.png?w=%d" % [BASE_URL, slug, name, w]
+	var url := "%s/v1/art/crops/%s/%s.png?w=%d" % [base_url, slug, name, w]
 	var bytes := await _download_png(url)
 	if bytes.is_empty():
 		return null
@@ -316,7 +323,7 @@ func _download_crop_set(slug: String, dir: String) -> void:
 
 
 func _download_crop_art(slug: String, name: String, w: int, dir: String) -> void:
-	var url := "%s/v1/art/crops/%s/%s.png?w=%d" % [BASE_URL, slug, name, w]
+	var url := "%s/v1/art/crops/%s/%s.png?w=%d" % [base_url, slug, name, w]
 	var bytes := await _download_png(url)
 	if bytes.is_empty():
 		return
@@ -392,7 +399,7 @@ func start_ws() -> void:
 	if token == "":
 		return  # 未登录不连 WS
 	_socket = WebSocketPeer.new()
-	var err := _socket.connect_to_url(WS_URL + "?token=" + token.uri_encode())
+	var err := _socket.connect_to_url(ws_url + "?token=" + token.uri_encode())
 	if err != OK:
 		push_warning("节气 WebSocket 连接失败: %s" % err)
 

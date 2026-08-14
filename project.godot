@@ -21,10 +21,15 @@ Backend="*res://scripts/backend_client.gd"
 
 [display]
 
+; 设计分辨率（参考尺寸）：运行时按屏幕自动等比缩放，非写死大小。
+; 任意手机/窗口都会通过下方 stretch 设置铺满。
 window/size/viewport_width=720
 window/size/viewport_height=1280
 window/stretch/mode="canvas_items"
+; expand：无黑边铺满（多出的空间由锚点布局自然延伸），竖屏游戏首选
 window/stretch/aspect="expand"
+; 手机锁定竖屏（0=横屏 1=竖屏 5=跟随竖屏传感器）
+window/handheld/orientation=1
 
 [physics]
 
