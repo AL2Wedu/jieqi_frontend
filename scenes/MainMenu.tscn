@@ -4,50 +4,58 @@
 [ext_resource type="Texture2D" path="res://assets/backgrounds/mainmenu_bg.png" id="2_bg"]
 
 [sub_resource type="StyleBoxFlat" id="sb_btn"]
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.85, 0.68, 0.4, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.478, 0.322, 0.188, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0.31, 0.2, 0.11, 0.35)
-shadow_size = 6
+content_margin_left = 36.0
+content_margin_top = 14.0
+content_margin_right = 36.0
+content_margin_bottom = 14.0
+bg_color = Color(0.71, 0.5, 0.28, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.88, 0.7, 0.44, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0.2, 0.12, 0.05, 0.5)
+shadow_size = 8
 
 [sub_resource type="StyleBoxFlat" id="sb_btn_hover"]
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.92, 0.76, 0.48, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.478, 0.322, 0.188, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-shadow_color = Color(0.31, 0.2, 0.11, 0.35)
-shadow_size = 6
+content_margin_left = 36.0
+content_margin_top = 14.0
+content_margin_right = 36.0
+content_margin_bottom = 14.0
+bg_color = Color(0.84, 0.64, 0.4, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.97, 0.84, 0.58, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0.25, 0.15, 0.07, 0.45)
+shadow_size = 10
 
 [sub_resource type="StyleBoxFlat" id="sb_btn_pressed"]
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.76, 0.6, 0.34, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.478, 0.322, 0.188, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
+content_margin_left = 36.0
+content_margin_top = 16.0
+content_margin_right = 36.0
+content_margin_bottom = 12.0
+bg_color = Color(0.6, 0.42, 0.22, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.78, 0.6, 0.36, 1)
+corner_radius_top_left = 28
+corner_radius_top_right = 28
+corner_radius_bottom_right = 28
+corner_radius_bottom_left = 28
+shadow_color = Color(0.15, 0.09, 0.04, 0.4)
+shadow_size = 3
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -79,63 +87,64 @@ texture = ExtResource("2_bg")
 expand_mode = 1
 stretch_mode = 6
 
-[node name="CenterContainer" type="CenterContainer" parent="."]
+[node name="MenuBox" type="Control" parent="."]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
+mouse_filter = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="CenterContainer"]
-layout_mode = 2
-theme_override_constants/separation = 20
+[node name="VBoxContainer" type="VBoxContainer" parent="MenuBox"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -170.0
+offset_top = -440.0
+offset_right = 170.0
+offset_bottom = -160.0
+grow_horizontal = 2
+grow_vertical = 0
+theme_override_constants/separation = 22
 
-[node name="TitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
+[node name="StartButton" type="Button" parent="MenuBox/VBoxContainer"]
+custom_minimum_size = Vector2(320, 76)
 layout_mode = 2
-theme_override_colors/font_color = Color(1, 0.96, 0.82, 1)
-theme_override_colors/font_outline_color = Color(0.3, 0.4, 0.16, 1)
-theme_override_constants/outline_size = 8
-theme_override_font_sizes/font_size = 68
-text = "节气造物主"
-horizontal_alignment = 1
-
-[node name="SubtitleLabel" type="Label" parent="CenterContainer/VBoxContainer"]
-layout_mode = 2
-theme_override_colors/font_color = Color(0.98, 0.94, 0.78, 1)
-theme_override_font_sizes/font_size = 22
-text = "二十四节气 · 创造"
-horizontal_alignment = 1
-
-[node name="Spacer" type="Control" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(0, 36)
-layout_mode = 2
-
-[node name="StartButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(300, 64)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
-theme_override_font_sizes/font_size = 28
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.97, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0.25, 0.15, 0.07, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("sb_btn")
 theme_override_styles/hover = SubResource("sb_btn_hover")
 theme_override_styles/pressed = SubResource("sb_btn_pressed")
 text = "开始游戏"
 
-[node name="SettingsButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(300, 64)
+[node name="SettingsButton" type="Button" parent="MenuBox/VBoxContainer"]
+custom_minimum_size = Vector2(320, 76)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
-theme_override_font_sizes/font_size = 28
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.97, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0.25, 0.15, 0.07, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("sb_btn")
 theme_override_styles/hover = SubResource("sb_btn_hover")
 theme_override_styles/pressed = SubResource("sb_btn_pressed")
 text = "设置"
 
-[node name="QuitButton" type="Button" parent="CenterContainer/VBoxContainer"]
-custom_minimum_size = Vector2(300, 64)
+[node name="QuitButton" type="Button" parent="MenuBox/VBoxContainer"]
+custom_minimum_size = Vector2(320, 76)
 layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
-theme_override_font_sizes/font_size = 28
+size_flags_horizontal = 4
+theme_override_colors/font_color = Color(1, 0.97, 0.9, 1)
+theme_override_colors/font_outline_color = Color(0.25, 0.15, 0.07, 1)
+theme_override_constants/outline_size = 3
+theme_override_font_sizes/font_size = 30
 theme_override_styles/normal = SubResource("sb_btn")
 theme_override_styles/hover = SubResource("sb_btn_hover")
 theme_override_styles/pressed = SubResource("sb_btn_pressed")

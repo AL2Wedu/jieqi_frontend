@@ -6,9 +6,9 @@ signal quit_requested
 
 const SETTINGS_PANEL := preload("res://scenes/SettingsPanel.tscn")
 
-@onready var _start_button: Button = $CenterContainer/VBoxContainer/StartButton
-@onready var _settings_button: Button = $CenterContainer/VBoxContainer/SettingsButton
-@onready var _quit_button: Button = $CenterContainer/VBoxContainer/QuitButton
+@onready var _start_button: Button = $MenuBox/VBoxContainer/StartButton
+@onready var _settings_button: Button = $MenuBox/VBoxContainer/SettingsButton
+@onready var _quit_button: Button = $MenuBox/VBoxContainer/QuitButton
 
 var _settings_panel: Control = null
 
@@ -22,6 +22,21 @@ func _ready() -> void:
 	add_child(_settings_panel)
 	_settings_panel.visible = false
 	_settings_panel.close_requested.connect(func() -> void: _settings_panel.visible = false)
+
+	for btn in [_start_button, _settings_button, _quit_button]:
+		_style_press(btn)
+
+
+## 按钮按压反馈：按下轻微缩小、抬起回弹。
+func _style_press(btn: Button) -> void:
+	btn.button_down.connect(func() -> void:
+		if btn.pivot_offset == Vector2.ZERO and btn.size != Vector2.ZERO:
+			btn.pivot_offset = btn.size / 2.0
+		var tw := create_tween()
+		tw.tween_property(btn, "scale", Vector2(0.94, 0.94), 0.07))
+	btn.button_up.connect(func() -> void:
+		var tw := create_tween()
+		tw.tween_property(btn, "scale", Vector2.ONE, 0.12))
 
 
 ## 打开设置面板。
