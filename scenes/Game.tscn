@@ -22,12 +22,22 @@ script = ExtResource("1_game")
 
 [node name="ShopHotspot" type="Button" parent="."]
 unique_name_in_owner = true
-offset_left = 540.0
-offset_top = 190.0
-offset_right = 720.0
-offset_bottom = 440.0
+offset_left = 492.0
+offset_top = 220.0
+offset_right = 672.0
+offset_bottom = 470.0
 focus_mode = 0
 tooltip_text = "商店"
+mouse_default_cursor_shape = 2
+
+[node name="StorageButton" type="Button" parent="."]
+unique_name_in_owner = true
+offset_left = 596.0
+offset_top = 196.0
+offset_right = 700.0
+offset_bottom = 300.0
+focus_mode = 0
+tooltip_text = "收成仓"
 mouse_default_cursor_shape = 2
 
 [node name="FarmGrid" parent="." instance=ExtResource("4_grid")]

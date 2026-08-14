@@ -58,6 +58,23 @@ func set_crop_texture(tex: Texture2D) -> void:
 		_crop_label.visible = not show
 
 
+## 设置作物贴图尺寸：stage 1 幼苗一倍（居中），stage 2/3 二倍（上移半格，盖在边框上方）。
+func set_crop_stage_scale(stage: int) -> void:
+	_crop_art.anchor_left = 0.5
+	_crop_art.anchor_top = 0.5
+	_crop_art.anchor_right = 0.5
+	_crop_art.anchor_bottom = 0.5
+	var half := 29.0
+	var top := -29.0
+	if stage >= 2:
+		half = 58.0
+		top = -100.0  # 二倍：上移约半格（42px）
+	_crop_art.offset_left = -half
+	_crop_art.offset_top = top
+	_crop_art.offset_right = half
+	_crop_art.offset_bottom = top + half * 2.0
+
+
 ## 清空作物贴图（地块换作物/清空时调用，避免旧贴图残留）。
 func reset_crop_art() -> void:
 	_crop_art.texture = null

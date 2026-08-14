@@ -35,23 +35,6 @@ texture = ExtResource("2_soil")
 expand_mode = 1
 stretch_mode = 0
 
-[node name="CropArt" type="TextureRect" parent="."]
-unique_name_in_owner = true
-visible = false
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 10.0
-offset_top = 10.0
-offset_right = -10.0
-offset_bottom = -10.0
-grow_horizontal = 2
-grow_vertical = 2
-mouse_filter = 2
-expand_mode = 1
-stretch_mode = 5
-
 [node name="Frame" type="TextureRect" parent="."]
 unique_name_in_owner = true
 layout_mode = 1
@@ -64,6 +47,25 @@ mouse_filter = 2
 texture = ExtResource("3_frame")
 expand_mode = 1
 stretch_mode = 0
+
+[node name="CropArt" type="TextureRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -58.0
+offset_top = -100.0
+offset_right = 58.0
+offset_bottom = 16.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
 
 [node name="CropLabel" type="Label" parent="."]
 unique_name_in_owner = true

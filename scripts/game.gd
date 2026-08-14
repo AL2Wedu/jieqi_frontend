@@ -6,6 +6,7 @@ signal back_to_menu_requested
 const SOLAR_TERMS := ["立春", "雨水", "惊蛰", "春分", "清明", "谷雨", "立夏", "小满", "芒种", "夏至", "小暑", "大暑", "立秋", "处暑", "白露", "秋分", "寒露", "霜降", "立冬", "小雪", "大雪", "冬至", "小寒", "大寒"]
 const CROP_PICKER := preload("res://scenes/CropPicker.tscn")
 const SHOP := preload("res://scenes/Shop.tscn")
+const STORAGE_PANEL := preload("res://scenes/farm/StoragePanel.tscn")
 
 @onready var _top_bar: TopBar = $TopBar
 @onready var _world: FarmWorld = $FarmWorld
@@ -15,6 +16,7 @@ const SHOP := preload("res://scenes/Shop.tscn")
 @onready var _status: LandStatusPanel = $LandStatusPanel
 @onready var _npc: NpcDialog = $NpcDialog
 @onready var _shop_hotspot: Button = %ShopHotspot
+@onready var _storage_button: Button = %StorageButton
 
 var _gold := 0
 var _term_index := 0
@@ -23,6 +25,7 @@ var _plots_data: Array = []          # 后端 /farm/state 的 plots 缓存
 var _fertilizer_item_id := ""
 var _crop_picker: Control = null
 var _shop: Control = null
+var _storage_panel: Control = null
 
 
 func _ready() -> void:
@@ -44,6 +47,30 @@ func _ready() -> void:
 	# 商店入口热区（透明，悬停高亮）
 	_style_shop_hotspot()
 	_shop_hotspot.pressed.connect(_open_shop)
+
+	# 收成仓入口（顶栏下方右侧，图标按钮，透明背景）
+	_storage_button.icon = load("res://assets/icons/storage_silo.png")
+	_storage_button.expand_icon = true
+	_storage_button.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_storage_button.add_theme_stylebox_override("normal", StyleBoxEmpty.new())
+	_storage_button.add_theme_stylebox_override("pressed", StyleBoxEmpty.new())
+	_storage_button.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+	var st_hover := StyleBoxFlat.new()
+	st_hover.bg_color = Color(1, 1, 0.6, 0.12)
+	st_hover.set_corner_radius_all(16)
+	st_hover.border_width_left = 3
+	st_hover.border_width_top = 3
+	st_hover.border_width_right = 3
+	st_hover.border_width_bottom = 3
+	st_hover.border_color = Color(0.9, 0.75, 0.3, 0.6)
+	_storage_button.add_theme_stylebox_override("hover", st_hover)
+	_storage_button.pressed.connect(_open_storage)
+
+	# 收成仓查看面板
+	_storage_panel = STORAGE_PANEL.instantiate()
+	add_child(_storage_panel)
+	_storage_panel.visible = false
+	_storage_panel.close_requested.connect(func() -> void: _storage_panel.visible = false)
 
 	_refresh_top_bar()
 	_grid.select_index(0)  # 同步高亮与逻辑选中（会触发 plot_selected → _on_plot_selected）
@@ -101,6 +128,10 @@ func _on_term_changed(payload: Dictionary) -> void:
 
 func _open_shop() -> void:
 	_shop.visible = true
+
+
+func _open_storage() -> void:
+	_storage_panel.open()
 
 
 ## 商店入口热区透明化，悬停轻微高亮提示可点。
@@ -302,6 +333,9 @@ func _refresh_top_bar() -> void:
 ## 按 Esc：先关商店/播种弹窗，再返回主菜单。
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		if _storage_panel != null and _storage_panel.visible:
+			_storage_panel.visible = false
+			return
 		if _shop != null and _shop.visible:
 			_shop.visible = false
 			return

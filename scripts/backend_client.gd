@@ -4,7 +4,7 @@ extends Node
 
 ## 服务器地址：桌面调试默认本机。真机（Android）请改成电脑/服务器的局域网 IP，
 ## 或用环境变量 JIEQI_SERVER 覆盖（adb / 导出时注入）。
-var base_url := "http://127.0.0.1:8000"
+var base_url := "http://192.168.254.29:8000"
 var api := ""
 var ws_url := ""
 
@@ -200,6 +200,11 @@ func get_shop() -> Dictionary:
 
 func get_inventory() -> Dictionary:
 	return await request("GET", "/player/inventory")
+
+
+## 收成仓（收获入仓 + 当前收购价）。
+func get_storage() -> Dictionary:
+	return await request("GET", "/shop/storage")
 
 
 ## ---------------- 农场操作 ----------------

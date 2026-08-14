@@ -98,6 +98,7 @@ func apply_farm_state(plots: Array) -> void:
 					3:
 						pstate = FarmPlot.PlotState.MATURE
 				plot.set_plot_state(pstate, str(crop.get("name", "")))
+				plot.set_crop_stage_scale(stage)
 				_load_crop_art(plot, crop, stage)
 
 
