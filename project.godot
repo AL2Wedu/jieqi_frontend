@@ -8,16 +8,16 @@
 
 config_version=5
 
-[autoload]
-
-Backend="*res://scripts/backend_client.gd"
-
 [application]
 
 config/name="节气造物主"
 run/main_scene="res://Main.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
 config/icon="res://icon.svg"
+
+[autoload]
+
+Backend="*res://scripts/backend_client.gd"
 
 [display]
 
@@ -35,3 +35,4 @@ window/stretch/aspect="expand"
 rendering_device/driver.windows="d3d12"
 renderer/rendering_method="gl_compatibility"
 renderer/rendering_method.mobile="gl_compatibility"
+textures/vram_compression/import_etc2_astc=true
