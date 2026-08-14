@@ -17,6 +17,9 @@ var crop_key := ""  # 当前作物身份（<slug>|<stage>），用于检测地�
 @onready var _crop_label: Label = %CropLabel
 @onready var _lock_icon: TextureRect = %LockIcon
 @onready var _pest_bubble: PanelContainer = %PestBubble
+@onready var _weed_icon: TextureRect = %WeedIcon
+@onready var _pest_countdown: PanelContainer = %PestCountdown
+@onready var _pest_countdown_label: Label = %PestCountdownLabel
 @onready var _soil: TextureRect = %Soil
 @onready var _frame: TextureRect = %Frame
 @onready var _crop_art: TextureRect = %CropArt
@@ -37,6 +40,18 @@ func set_plot_state(new_state: int, crop_name: String = "") -> void:
 ## 是否显示“害虫”感叹号。
 func set_pest(has_pest: bool) -> void:
 	_pest_bubble.visible = has_pest
+
+
+## 是否显示杂草（该地块作物生长减速）。
+func set_weeded(has_weed: bool) -> void:
+	_weed_icon.visible = has_weed
+
+
+## 小虫害倒计时：remaining > 0 显示剩余秒；<= 0 隐藏。
+func set_pest_countdown(remaining: int) -> void:
+	_pest_countdown.visible = remaining > 0
+	if remaining > 0:
+		_pest_countdown_label.text = "%ds" % remaining
 
 
 func set_selected(sel: bool) -> void:

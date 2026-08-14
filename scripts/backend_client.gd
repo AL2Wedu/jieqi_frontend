@@ -4,7 +4,7 @@ extends Node
 
 ## 服务器地址：桌面调试默认本机。真机（Android）请改成电脑/服务器的局域网 IP，
 ## 或用环境变量 JIEQI_SERVER 覆盖（adb / 导出时注入）。
-var base_url := "http://192.168.254.29:8000"
+var base_url := "http://192.168.254.38:8000"
 var api := ""
 var ws_url := ""
 
@@ -12,10 +12,17 @@ const SAVE_PATH := "user://player.json"
 const ART_VERSION_FILE := "user://art_version.json"
 const REQUEST_TIMEOUT := 10
 const TERM_POLL_SECONDS := 20.0
+const WS_PING_SECONDS := 30.0
 
 signal term_changed(payload: Dictionary)
 ## 资源权威变更：管理后台编辑玩家资产 → 强制刷新 /player/me 成功后发出，携带最新玩家数据。
 signal resources_changed(player_data: Dictionary)
+## 服务端主动推送的农场事件（虫害/枯萎/杂草），payload 为事件自带字段。
+signal pest_big_event(payload: Dictionary)
+signal pest_small_event(payload: Dictionary)
+signal pest_destroyed_event(payload: Dictionary)
+signal crop_withered_event(payload: Dictionary)
+signal weed_growth_event(payload: Dictionary)
 signal auth_expired
 
 var token := ""
@@ -24,6 +31,7 @@ var current_term: Dictionary = {}
 
 var _socket: WebSocketPeer = null
 var _ws_timer: Timer = null
+var _ws_ping_timer: Timer = null
 var _term_poll_timer: Timer = null
 
 # 素材缓存：当前已下载到的素材版本（决定缓存目录）。
@@ -83,10 +91,17 @@ func request(method: String, path: String, body: Variant = {}, authed := true) -
 		headers.append("Authorization: Bearer %s" % token)
 
 	var err := OK
-	if method == "GET" and body.is_empty():
+	var http_method := HTTPClient.METHOD_GET
+	match method:
+		"POST":
+			http_method = HTTPClient.METHOD_POST
+		"DELETE":
+			http_method = HTTPClient.METHOD_DELETE
+	var has_body: bool = not (body.is_empty() and (method == "GET" or method == "DELETE"))
+	if not has_body:
 		err = req.request(url, headers)
 	else:
-		err = req.request(url, headers, HTTPClient.METHOD_GET if method == "GET" else HTTPClient.METHOD_POST, JSON.stringify(body))
+		err = req.request(url, headers, http_method, JSON.stringify(body))
 	if err != OK:
 		req.queue_free()
 		return { "code": -1, "message": "请求失败(%d)" % err }
@@ -229,6 +244,99 @@ func harvest(plot_id: String) -> Dictionary:
 
 func use_item(item_id: String, plot_id: String) -> Dictionary:
 	return await request("POST", "/player/inventory/%s/use" % item_id, { "target": { "plot_id": plot_id } })
+
+
+func clear_plot(plot_id: String) -> Dictionary:
+	return await request("POST", "/farm/plots/%s/clear" % plot_id)
+
+
+## ---------------- 虫害 ----------------
+
+## 我的虫害状态：下次触发 / 进行中的大虫害 / 寄生中的小虫害地块。
+func get_pest_state() -> Dictionary:
+	return await request("GET", "/pest/state")
+
+
+## 大虫害成绩提交（音游结束）。当前未做音游，弃战时提交 0/100/0。
+func submit_pest_result(pest_id: String, score: int, max_score: int, miss_count: int) -> Dictionary:
+	return await request("POST", "/farm/pest/%s/result" % pest_id,
+		{ "score": score, "max_score": max_score, "miss_count": miss_count })
+
+
+## 驱赶小虫害（寄生在地块 plot_id 上）。
+func drive_away(pest_id: String, plot_id: String) -> Dictionary:
+	return await request("POST", "/farm/pest/%s/drive-away" % pest_id, { "plot_id": plot_id })
+
+
+## ---------------- 商店 / 收成仓 ----------------
+
+## 我的商店完整状态：商品（库存/售价）+ 作物收购价 + 当前季节。
+func get_shop_state() -> Dictionary:
+	return await request("GET", "/shop/state")
+
+
+## 出售收成仓作物（按当前季节/分类收购价结算）。
+func sell_crop(crop_id: String, quantity: int) -> Dictionary:
+	return await request("POST", "/shop/crops/%s/sell" % crop_id, { "quantity": quantity })
+
+
+## ---------------- 任务 / 成就 ----------------
+
+func get_quests() -> Dictionary:
+	return await request("GET", "/quests")
+
+
+func claim_quest(quest_id: String) -> Dictionary:
+	return await request("POST", "/quests/%s/claim" % quest_id)
+
+
+func get_achievements() -> Dictionary:
+	return await request("GET", "/achievements")
+
+
+func claim_achievement(achievement_id: String) -> Dictionary:
+	return await request("POST", "/achievements/%s/claim" % achievement_id)
+
+
+## ---------------- 好友 ----------------
+
+func get_friends() -> Dictionary:
+	return await request("GET", "/social/friends")
+
+
+func get_friend_requests() -> Dictionary:
+	return await request("GET", "/social/requests")
+
+
+func send_friend_request(player_id: String) -> Dictionary:
+	return await request("POST", "/social/requests", { "player_id": player_id })
+
+
+func accept_friend(player_id: String) -> Dictionary:
+	return await request("POST", "/social/requests/%s/accept" % player_id)
+
+
+func reject_friend(player_id: String) -> Dictionary:
+	return await request("POST", "/social/requests/%s/reject" % player_id)
+
+
+func remove_friend(player_id: String) -> Dictionary:
+	return await request("DELETE", "/social/friends/%s" % player_id)
+
+
+## ---------------- AI 聊天 ----------------
+
+## OpenAI 兼容对话转发：请求体透传，响应原样返回。
+func ai_chat(payload: Dictionary) -> Dictionary:
+	return await request("POST", "/ai/chat", payload)
+
+
+func ai_models() -> Dictionary:
+	return await request("GET", "/ai/models")
+
+
+func ai_usage() -> Dictionary:
+	return await request("GET", "/ai/usage")
 
 
 ## ---------------- 作物美术（版本 + 本地缓存） ----------------
@@ -409,9 +517,24 @@ func start_ws() -> void:
 	var err := _socket.connect_to_url(ws_url + "?token=" + token.uri_encode())
 	if err != OK:
 		push_warning("节气 WebSocket 连接失败: %s" % err)
+	# 心跳：每 30s 发 ping，刷新服务端在线判定
+	_ws_ping_timer = Timer.new()
+	_ws_ping_timer.wait_time = WS_PING_SECONDS
+	_ws_ping_timer.timeout.connect(_send_ping)
+	add_child(_ws_ping_timer)
+	_ws_ping_timer.start()
+
+
+func _send_ping() -> void:
+	if _socket != null and _socket.get_ready_state() == WebSocketPeer.STATE_OPEN:
+		_socket.send_text("ping")
 
 
 func _stop_ws() -> void:
+	if _ws_ping_timer != null:
+		_ws_ping_timer.stop()
+		_ws_ping_timer.queue_free()
+		_ws_ping_timer = null
 	if _ws_timer != null:
 		_ws_timer.stop()
 		_ws_timer.queue_free()
@@ -439,6 +562,18 @@ func _handle_ws_message(message: String) -> void:
 		"resources_changed":
 			# 资源权威变更：不依赖轮询，立即强制刷新 /player/me 并更新本地资源
 			_refresh_resources()
+		"pest_big":
+			pest_big_event.emit(msg.get("payload", {}))
+		"pest_small":
+			pest_small_event.emit(msg.get("payload", {}))
+		"pest_destroyed":
+			pest_destroyed_event.emit(msg.get("payload", {}))
+		"crop_withered":
+			crop_withered_event.emit(msg.get("payload", {}))
+		"weed_growth":
+			weed_growth_event.emit(msg.get("payload", {}))
+		"pong":
+			pass  # 心跳回复，无需处理
 		_:
 			pass  # 未知事件类型一律忽略（向前兼容）
 

@@ -107,6 +107,20 @@ theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
 theme_override_font_sizes/font_size = 21
 text = "甲子年 立春"
 
+[node name="CountdownLabel" type="Label" parent="Frame/Panel/Margin/HBox/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.36, 0.16, 1)
+theme_override_font_sizes/font_size = 16
+text = "本轮剩余 --:--"
+
+[node name="UnlockedLabel" type="Label" parent="Frame/Panel/Margin/HBox/Center"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.42, 0.2, 1)
+theme_override_font_sizes/font_size = 14
+text = "解锁至：立春"
+
 [node name="WeatherRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Center"]
 layout_mode = 2
 theme_override_constants/separation = 4
@@ -192,4 +206,33 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.6, 0.42, 0.07, 1)
 theme_override_font_sizes/font_size = 18
 text = "12860"
+vertical_alignment = 1
+
+[node name="LevelRow" type="HBoxContainer" parent="Frame/Panel/Margin/HBox/Resources"]
+layout_mode = 2
+theme_override_constants/separation = 5
+
+[node name="LevelValue" type="Label" parent="Frame/Panel/Margin/HBox/Resources/LevelRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 16
+text = "Lv.1"
+
+[node name="ExpBar" type="ProgressBar" parent="Frame/Panel/Margin/HBox/Resources/LevelRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(70, 14)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+theme_override_styles/background = SubResource("sb_bar_bg")
+theme_override_styles/fill = SubResource("sb_bar_fill")
+value = 0.0
+
+[node name="ExpValue" type="Label" parent="Frame/Panel/Margin/HBox/Resources/LevelRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.29, 0.616, 0.878, 1)
+theme_override_font_sizes/font_size = 14
+text = "0"
 vertical_alignment = 1

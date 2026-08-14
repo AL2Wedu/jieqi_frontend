@@ -1,0 +1,154 @@
+[gd_scene load_steps=4 format=3]
+
+[ext_resource type="Script" path="res://scripts/ai_chat_panel.gd" id="1_ai"]
+
+[sub_resource type="StyleBoxFlat" id="sb_panel"]
+content_margin_left = 24.0
+content_margin_top = 20.0
+content_margin_right = 24.0
+content_margin_bottom = 20.0
+bg_color = Color(0.98, 0.94, 0.84, 0.97)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.478, 0.322, 0.188, 1)
+corner_radius_top_left = 24
+corner_radius_top_right = 24
+corner_radius_bottom_right = 24
+corner_radius_bottom_left = 24
+shadow_color = Color(0.31, 0.2, 0.11, 0.35)
+shadow_size = 10
+
+[sub_resource type="StyleBoxFlat" id="sb_btn"]
+content_margin_top = 8.0
+content_margin_bottom = 8.0
+bg_color = Color(0.85, 0.68, 0.4, 1)
+border_width_left = 4
+border_width_top = 4
+border_width_right = 4
+border_width_bottom = 4
+border_color = Color(0.478, 0.322, 0.188, 1)
+corner_radius_top_left = 20
+corner_radius_top_right = 20
+corner_radius_bottom_right = 20
+corner_radius_bottom_left = 20
+
+[node name="AiChatPanel" type="Control"]
+visible = false
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_ai")
+
+[node name="Dim" type="ColorRect" parent="."]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.5)
+mouse_filter = 1
+
+[node name="Center" type="CenterContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Panel" type="PanelContainer" parent="Center"]
+custom_minimum_size = Vector2(620, 800)
+layout_mode = 2
+theme_override_styles/panel = SubResource("sb_panel")
+
+[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Title" type="Label" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 32
+text = "节气助手"
+horizontal_alignment = 1
+
+[node name="TopRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="ModelOption" type="OptionButton" parent="Center/Panel/VBox/TopRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(260, 44)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+
+[node name="UsageLabel" type="Label" parent="Center/Panel/VBox/TopRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.55, 0.42, 0.2, 1)
+theme_override_font_sizes/font_size = 15
+text = ""
+vertical_alignment = 1
+
+[node name="ChatScroll" type="ScrollContainer" parent="Center/Panel/VBox"]
+custom_minimum_size = Vector2(0, 560)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ChatLog" type="RichTextLabel" parent="Center/Panel/VBox/ChatScroll"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/default_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/normal_font_size = 18
+text = "你好，我是节气助手，可以问我节气、种田、农事的问题～\n"
+scroll_active = false
+
+[node name="Hint" type="Label" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.85, 0.3, 0.3, 1)
+theme_override_font_sizes/font_size = 15
+text = ""
+horizontal_alignment = 1
+
+[node name="InputRow" type="HBoxContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Input" type="LineEdit" parent="Center/Panel/VBox/InputRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 52)
+layout_mode = 2
+size_flags_horizontal = 3
+placeholder_text = "输入想问的问题…"
+theme_override_font_sizes/font_size = 18
+
+[node name="SendButton" type="Button" parent="Center/Panel/VBox/InputRow"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(120, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_btn")
+theme_override_styles/hover = SubResource("sb_btn")
+text = "发送"
+
+[node name="CloseButton" type="Button" parent="Center/Panel/VBox"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(220, 52)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 22
+theme_override_styles/normal = SubResource("sb_btn")
+theme_override_styles/hover = SubResource("sb_btn")
+text = "返回"

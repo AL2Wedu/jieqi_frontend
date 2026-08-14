@@ -8,7 +8,7 @@ const ACTIONS := [
 	{ "name": "播种", "icon": "res://assets/icons/action_seed.png" },
 	{ "name": "灌溉", "icon": "res://assets/icons/action_irrigate.png" },
 	{ "name": "施肥", "icon": "res://assets/icons/action_fertilize.png" },
-	{ "name": "除草", "icon": "res://assets/icons/action_weed.png" },
+	{ "name": "铲除", "icon": "res://assets/icons/action_weed.png" },
 	{ "name": "收割", "icon": "res://assets/icons/action_harvest.png" },
 ]
 
