@@ -14,6 +14,8 @@ const REQUEST_TIMEOUT := 10
 const TERM_POLL_SECONDS := 20.0
 
 signal term_changed(payload: Dictionary)
+## 资源权威变更：管理后台编辑玩家资产 → 强制刷新 /player/me 成功后发出，携带最新玩家数据。
+signal resources_changed(player_data: Dictionary)
 signal auth_expired
 
 var token := ""
@@ -429,10 +431,26 @@ func _handle_ws_message(message: String) -> void:
 	if not (parsed is Dictionary):
 		return
 	var msg: Dictionary = parsed
-	if msg.get("type", "") == "solar_term_change":
-		current_term = msg.get("payload", {})
-		term_changed.emit(current_term)
-		check_art_updates()
+	match str(msg.get("type", "")):
+		"solar_term_change":
+			current_term = msg.get("payload", {})
+			term_changed.emit(current_term)
+			check_art_updates()
+		"resources_changed":
+			# 资源权威变更：不依赖轮询，立即强制刷新 /player/me 并更新本地资源
+			_refresh_resources()
+		_:
+			pass  # 未知事件类型一律忽略（向前兼容）
+
+
+## 收到 resources_changed 推送：强制刷新 /player/me，更新本地玩家缓存并广播。
+func _refresh_resources() -> void:
+	var me := await get_player_me()
+	if me.get("code", -1) != 0:
+		return
+	player = me["data"]
+	save_local()
+	resources_changed.emit(player)
 
 
 func _auto_refresh_term() -> void:

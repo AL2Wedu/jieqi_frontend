@@ -32,6 +32,7 @@ func _ready() -> void:
 	_grid.plot_selected.connect(_on_plot_selected)
 	_toolbar.action_selected.connect(_on_action_selected)
 	Backend.term_changed.connect(_on_term_changed)
+	Backend.resources_changed.connect(_on_resources_changed)
 
 	# 播种选作物弹窗
 	_crop_picker = CROP_PICKER.instantiate()
@@ -119,6 +120,12 @@ func _apply_term(data: Dictionary) -> void:
 
 func _on_term_changed(payload: Dictionary) -> void:
 	_apply_term(payload)
+
+
+## 管理后台改了玩家资产（resources_changed 推送）：以强制刷新后的 /player/me 为准。
+func _on_resources_changed(player_data: Dictionary) -> void:
+	_gold = int(player_data.get("coins", _gold))
+	_refresh_top_bar()
 
 
 func _open_shop() -> void:
