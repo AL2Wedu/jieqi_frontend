@@ -1,147 +1,91 @@
 extends Control
-## 真实商店：购买商品（库存/售价）+ 查看作物收购价（季节涨降）。
+## 商店页面（当前为占位，商店内容待做）。
+## 进入/退出都播放加载动画（蓝条纹进度条 3-5s 到 100%），随后淡出露出/隐藏商店。
 
 signal close_requested
 signal assets_changed
 
-@onready var _season_label: Label = %SeasonLabel
-@onready var _items_tab: Button = %ItemsTab
-@onready var _quotes_tab: Button = %QuotesTab
-@onready var _items_scroll: ScrollContainer = %ItemsScroll
-@onready var _quotes_scroll: ScrollContainer = %QuotesScroll
-@onready var _items_list: VBoxContainer = %ItemsList
-@onready var _quotes_list: VBoxContainer = %QuotesList
-@onready var _hint: Label = %Hint
+const LOAD_SECONDS := 4.0   # 加载动画时长（3-5s 区间）
+const FADE_SECONDS := 0.6   # 加载页淡出时长
+
+@onready var _title: Label = %Title
+@onready var _sub: Label = %Sub
 @onready var _close: Button = %CloseButton
-@onready var _dim: ColorRect = %Dim
+@onready var _loading: Control = %LoadingOverlay
+@onready var _load_bar: ProgressBar = %Bar
+@onready var _load_pct: Label = %Pct
+
+var _busy := false  # 加载动画播放中（开或关），避免并发
 
 
 func _ready() -> void:
-	_close.pressed.connect(func() -> void: close_requested.emit())
-	_close.pressed.connect(func() -> void: hide())
-	_dim.gui_input.connect(_on_dim_input)
-	_items_tab.pressed.connect(func() -> void: _show_tab(true))
-	_quotes_tab.pressed.connect(func() -> void: _show_tab(false))
-	_show_tab(true)
+	_close.pressed.connect(close)
+	_load_bar.value_changed.connect(func(v: float) -> void: _load_pct.text = "%d%%" % int(round(v)))
+	_loading.visible = false
 
 
-## 打开商店并拉取数据。
+## 打开商店：先播放加载动画，淡出后露出商店。
 func open() -> void:
+	if _busy:
+		return
 	visible = true
-	_hint.visible = true
-	_hint.text = "加载中…"
-	await _refresh()
+	_show_content()
+	_busy = true
+	await _play_loading("商 店", "咻地一下冲向商店！")
+	_busy = false
 
 
-func _refresh() -> void:
-	var res := await Backend.get_shop_state()
-	if not is_instance_valid(self):
+## 退出商店：立刻隐藏商店内容（只剩加载页盖住），动画结束再整个隐藏。
+func close() -> void:
+	if _busy or not visible:
 		return
-	if res.get("code", -1) != 0:
-		_hint.visible = true
-		_hint.text = Backend.friendly_message(res, "加载失败")
-		return
-	var data: Dictionary = res["data"]
-	_season_label.text = "当前时节 · %s（每 %d 秒补货）" % [
-		str(data.get("season", "")), int(data.get("restock_seconds", 0))]
-	_fill_items(data.get("items", []))
-	_fill_quotes(data.get("crop_quotes", []))
-	_hint.visible = false
+	_busy = true
+	_hide_content()
+	await _play_loading("农 场", "一溜烟跑回农场～")
+	_busy = false
+	hide()
+	close_requested.emit()
 
 
-func _show_tab(items: bool) -> void:
-	_items_scroll.visible = items
-	_quotes_scroll.visible = not items
-	_items_tab.button_pressed = items
-	_quotes_tab.button_pressed = not items
+## 隐藏商店内容（保留加载页），避免淡出时商店闪现。
+func _hide_content() -> void:
+	for child in get_children():
+		if child != _loading:
+			child.visible = false
 
 
-func _clear_list(list_node: VBoxContainer) -> void:
-	for child in list_node.get_children():
-		list_node.remove_child(child)
-		child.queue_free()
+## 恢复商店内容显示。
+func _show_content() -> void:
+	for child in get_children():
+		if child != _loading:
+			child.visible = true
 
 
-## 商品行：名称 + 单价 + 库存 + 买。
-func _fill_items(items: Array) -> void:
-	_clear_list(_items_list)
-	for item in items:
-		var d: Dictionary = item
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
-		var name := Label.new()
-		name.text = "%s" % str(d.get("name", ""))
-		name.custom_minimum_size = Vector2(200, 0)
-		name.add_theme_font_size_override("font_size", 18)
-		name.add_theme_color_override("font_color", Color(0.42, 0.3, 0.15))
-		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(name)
-		var price := Label.new()
-		price.text = "%d 金币" % int(d.get("buy_price", 0))
-		price.add_theme_font_size_override("font_size", 17)
-		price.add_theme_color_override("font_color", Color(0.6, 0.42, 0.07))
-		row.add_child(price)
-		var stock := Label.new()
-		stock.text = "×%d" % int(d.get("stock", 0))
-		stock.add_theme_font_size_override("font_size", 17)
-		stock.add_theme_color_override("font_color", Color(0.55, 0.42, 0.2))
-		row.add_child(stock)
-		var btn := Button.new()
-		btn.text = "买"
-		btn.custom_minimum_size = Vector2(60, 40)
-		btn.focus_mode = Control.FOCUS_NONE
-		var item_id := str(d.get("item_id", ""))
-		var sold_out: bool = int(d.get("stock", 0)) <= 0
-		btn.disabled = sold_out
-		btn.pressed.connect(_buy.bind(item_id))
-		row.add_child(btn)
-		_items_list.add_child(row)
+## 重置加载页并播放进度条 + 淡出（加载期间暂停背景音乐，进度条区域不播放）。
+func _play_loading(title_text: String, sub_text: String) -> void:
+	Music.pause_for_loading()
+	_title.text = title_text
+	_sub.text = sub_text
+	_load_bar.value = 0.0
+	_load_pct.text = "0%"
+	_loading.modulate.a = 1.0
+	_loading.visible = true
+	await _animate_loading()
+	await _fade_loading()
+	Music.resume_after_loading()
 
 
-func _buy(item_id: String) -> void:
-	_hint.visible = true
-	_hint.text = "购买中…"
-	var res := await Backend.buy(item_id, 1)
-	if not is_instance_valid(self):
-		return
-	if res.get("code", -1) != 0:
-		_hint.visible = true
-		_hint.text = Backend.friendly_message(res, "购买失败")
-		return
-	_hint.text = ""
-	assets_changed.emit()
-	await _refresh()
+## 蓝色条纹进度条 0→100%，3-5 秒内到达。
+func _animate_loading() -> void:
+	var tw := create_tween()
+	tw.tween_property(_load_bar, "value", 100.0, LOAD_SECONDS) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_IN_OUT)
+	await tw.finished
 
 
-## 收购价行：名称 + 分类 + 单价 + 季节系数。
-func _fill_quotes(quotes: Array) -> void:
-	_clear_list(_quotes_list)
-	for q in quotes:
-		var d: Dictionary = q
-		var row := HBoxContainer.new()
-		row.add_theme_constant_override("separation", 8)
-		var name := Label.new()
-		name.text = "%s（%s）" % [str(d.get("name", "")), str(d.get("category", ""))]
-		name.custom_minimum_size = Vector2(200, 0)
-		name.add_theme_font_size_override("font_size", 18)
-		name.add_theme_color_override("font_color", Color(0.42, 0.3, 0.15))
-		name.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-		row.add_child(name)
-		var price := Label.new()
-		price.text = "%d 金币/株" % int(d.get("sell_price", 0))
-		price.add_theme_font_size_override("font_size", 17)
-		price.add_theme_color_override("font_color", Color(0.6, 0.42, 0.07))
-		row.add_child(price)
-		var factor := Label.new()
-		factor.text = "x%s" % str(d.get("season_factor", 1.0))
-		factor.add_theme_font_size_override("font_size", 16)
-		factor.add_theme_color_override("font_color", Color(0.55, 0.42, 0.2))
-		row.add_child(factor)
-		_quotes_list.add_child(row)
-
-
-## 点击遮罩关闭。
-func _on_dim_input(event: InputEvent) -> void:
-	if event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
-		close_requested.emit()
-		hide()
+## 加载页渐渐变淡。
+func _fade_loading() -> void:
+	var tw := create_tween()
+	tw.tween_property(_loading, "modulate:a", 0.0, FADE_SECONDS)
+	await tw.finished
+	_loading.visible = false

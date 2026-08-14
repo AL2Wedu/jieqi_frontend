@@ -1,13 +1,53 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene format=3 uid="uid://b5nq8slu8xkj"]
 
-[ext_resource type="Script" path="res://scripts/shop.gd" id="1_shop"]
+[ext_resource type="Script" uid="uid://drxlxyg1j82pw" path="res://scripts/shop.gd" id="1_shop"]
+[ext_resource type="Texture2D" uid="uid://jvmkubfb6atj" path="res://assets/ui/load_stripes.png" id="2_stripes"]
+[ext_resource type="Texture2D" uid="uid://ctxbyhrf6fwn8" path="res://assets/ui/shop/景色.png" id="3_scene"]
+[ext_resource type="Texture2D" uid="uid://rxxogs8x5mnk" path="res://assets/ui/shop/商店牌子.png" id="4_sign"]
+[ext_resource type="Texture2D" uid="uid://bmqxdj4585chm" path="res://assets/ui/shop/功能边框.png" id="5_frame"]
+[ext_resource type="Texture2D" uid="uid://nxy7dc1hofig" path="res://assets/ui/shop/菜篮子.png" id="7_basket"]
+[ext_resource type="Texture2D" uid="uid://c20cb6j6t77nh" path="res://assets/ui/shop/花盆.png" id="8_pot"]
+[ext_resource type="Texture2D" uid="uid://bjx0nn1pj3nwl" path="res://assets/ui/shop/添加按钮.png" id="10_add"]
+[ext_resource type="Texture2D" uid="uid://ddyxoigb2nm8j" path="res://assets/icons/resource_coin.png" id="12_coin"]
 
-[sub_resource type="StyleBoxFlat" id="sb_panel"]
-content_margin_left = 28.0
+[sub_resource type="StyleBoxFlat" id="sb_coin_bar"]
+content_margin_left = 18.0
+content_margin_top = 6.0
+content_margin_right = 18.0
+content_margin_bottom = 6.0
+bg_color = Color(1, 0.965, 0.871, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 100
+corner_radius_top_right = 100
+corner_radius_bottom_right = 100
+corner_radius_bottom_left = 100
+
+[sub_resource type="StyleBoxFlat" id="sb_close"]
+content_margin_left = 16.0
+content_margin_top = 8.0
+content_margin_right = 16.0
+content_margin_bottom = 8.0
+bg_color = Color(0.85, 0.68, 0.4, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.478, 0.322, 0.188, 1)
+corner_radius_top_left = 16
+corner_radius_top_right = 16
+corner_radius_bottom_right = 16
+corner_radius_bottom_left = 16
+
+[sub_resource type="StyleBoxFlat" id="sb_load_card"]
+content_margin_left = 26.0
 content_margin_top = 22.0
-content_margin_right = 28.0
+content_margin_right = 26.0
 content_margin_bottom = 22.0
-bg_color = Color(0.98, 0.94, 0.84, 0.97)
+bg_color = Color(0.659, 0.463, 0.243, 1)
 border_width_left = 4
 border_width_top = 4
 border_width_right = 4
@@ -17,41 +57,27 @@ corner_radius_top_left = 24
 corner_radius_top_right = 24
 corner_radius_bottom_right = 24
 corner_radius_bottom_left = 24
-shadow_color = Color(0.31, 0.2, 0.11, 0.35)
-shadow_size = 10
+shadow_color = Color(0.31, 0.2, 0.11, 0.4)
+shadow_size = 12
 
-[sub_resource type="StyleBoxFlat" id="sb_btn"]
-content_margin_top = 8.0
-content_margin_bottom = 8.0
-bg_color = Color(0.85, 0.68, 0.4, 1)
-border_width_left = 4
-border_width_top = 4
-border_width_right = 4
-border_width_bottom = 4
-border_color = Color(0.478, 0.322, 0.188, 1)
-corner_radius_top_left = 20
-corner_radius_top_right = 20
-corner_radius_bottom_right = 20
-corner_radius_bottom_left = 20
-
-[sub_resource type="StyleBoxFlat" id="sb_list"]
-content_margin_left = 12.0
-content_margin_top = 10.0
-content_margin_right = 12.0
-content_margin_bottom = 10.0
+[sub_resource type="StyleBoxFlat" id="sb_load_bar_bg"]
 bg_color = Color(1, 0.965, 0.871, 1)
-border_width_left = 3
-border_width_top = 3
-border_width_right = 3
-border_width_bottom = 3
+border_width_left = 2
+border_width_top = 2
+border_width_right = 2
+border_width_bottom = 2
 border_color = Color(0.784, 0.604, 0.373, 1)
-corner_radius_top_left = 14
-corner_radius_top_right = 14
-corner_radius_bottom_right = 14
-corner_radius_bottom_left = 14
+corner_radius_top_left = 12
+corner_radius_top_right = 12
+corner_radius_bottom_right = 12
+corner_radius_bottom_left = 12
 
-[node name="Shop" type="Control"]
-visible = false
+[sub_resource type="StyleBoxTexture" id="sb_load_stripe"]
+texture = ExtResource("2_stripes")
+axis_stretch_horizontal = 1
+axis_stretch_vertical = 1
+
+[node name="Shop" type="Control" unique_id=166368906]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -60,120 +86,201 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_shop")
 
-[node name="Dim" type="ColorRect" parent="."]
+[node name="Scene" type="TextureRect" parent="." unique_id=472977595]
 unique_name_in_owner = true
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
-color = Color(0, 0, 0, 0.5)
-mouse_filter = 1
+layout_mode = 0
+offset_left = 14.0
+offset_top = -8.0
+offset_right = 705.0
+offset_bottom = 485.0
+scale = Vector2(1, 1.1741188)
+mouse_filter = 2
+texture = ExtResource("3_scene")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Center" type="CenterContainer" parent="."]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-grow_horizontal = 2
-grow_vertical = 2
+[node name="Frame" type="TextureRect" parent="." unique_id=838434359]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = -58.0
+offset_top = -91.0
+offset_right = 762.0
+offset_bottom = 1368.0
+mouse_filter = 2
+texture = ExtResource("5_frame")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Panel" type="PanelContainer" parent="Center"]
+[node name="Basket" type="TextureRect" parent="." unique_id=799474741]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 514.0
+offset_top = 268.0
+offset_right = 694.0
+offset_bottom = 596.0
+mouse_filter = 2
+texture = ExtResource("7_basket")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Sign" type="TextureRect" parent="." unique_id=1948266429]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 239.0
+offset_top = 30.0
+offset_right = 498.0
+offset_bottom = 108.0
+mouse_filter = 2
+texture = ExtResource("4_sign")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="Pot" type="TextureRect" parent="." unique_id=1938263148]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 18.0
+offset_top = 386.0
+offset_right = 172.0
+offset_bottom = 586.0
+mouse_filter = 2
+texture = ExtResource("8_pot")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CoinBar" type="PanelContainer" parent="." unique_id=660744026]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 455.0
+offset_top = 33.0
+offset_right = 691.0
+offset_bottom = 96.0
+theme_override_styles/panel = SubResource("sb_coin_bar")
+
+[node name="GoldLabel" type="Label" parent="CoinBar" unique_id=1485667964]
+unique_name_in_owner = true
 layout_mode = 2
-theme_override_styles/panel = SubResource("sb_panel")
+theme_override_colors/font_color = Color(0.6, 0.42, 0.07, 1)
+theme_override_font_sizes/font_size = 24
+text = "0"
+horizontal_alignment = 1
+vertical_alignment = 1
 
-[node name="VBox" type="VBoxContainer" parent="Center/Panel"]
-layout_mode = 2
-theme_override_constants/separation = 12
+[node name="Coin" type="TextureRect" parent="." unique_id=289926059]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 451.0
+offset_top = 33.0
+offset_right = 517.0
+offset_bottom = 97.0
+mouse_filter = 2
+texture = ExtResource("12_coin")
+expand_mode = 1
+stretch_mode = 5
 
-[node name="Title" type="Label" parent="Center/Panel/VBox"]
-layout_mode = 2
+[node name="AddBtn" type="TextureRect" parent="." unique_id=1395657811]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 627.0
+offset_top = 20.0
+offset_right = 698.0
+offset_bottom = 104.0
+mouse_filter = 2
+texture = ExtResource("10_add")
+expand_mode = 1
+stretch_mode = 5
+
+[node name="CloseButton" type="Button" parent="." unique_id=1374273217]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 55.0
+offset_top = 41.0
+offset_right = 175.0
+offset_bottom = 89.0
 theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
-theme_override_font_sizes/font_size = 32
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_close")
+theme_override_styles/pressed = SubResource("sb_close")
+theme_override_styles/hover = SubResource("sb_close")
+theme_override_styles/focus = SubResource("sb_close")
+text = "返回"
+
+[node name="Dim" type="ColorRect" parent="." unique_id=1021192984]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 1
+color = Color(0, 0, 0, 0.5)
+
+[node name="LoadingOverlay" type="Control" parent="." unique_id=1227066685]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Background" type="ColorRect" parent="LoadingOverlay" unique_id=54463897]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.941, 0.89, 0.753, 1)
+
+[node name="Center" type="CenterContainer" parent="LoadingOverlay" unique_id=9841715]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Card" type="PanelContainer" parent="LoadingOverlay/Center" unique_id=752884182]
+custom_minimum_size = Vector2(480, 320)
+layout_mode = 2
+theme_override_styles/panel = SubResource("sb_load_card")
+
+[node name="VBox" type="VBoxContainer" parent="LoadingOverlay/Center/Card" unique_id=1299099437]
+layout_mode = 2
+theme_override_constants/separation = 18
+
+[node name="Title" type="Label" parent="LoadingOverlay/Center/Card/VBox" unique_id=618711603]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
+theme_override_font_sizes/font_size = 36
 text = "商店"
 horizontal_alignment = 1
 
-[node name="SeasonLabel" type="Label" parent="Center/Panel/VBox"]
+[node name="Sub" type="Label" parent="LoadingOverlay/Center/Card/VBox" unique_id=1666630832]
 unique_name_in_owner = true
 layout_mode = 2
-theme_override_colors/font_color = Color(0.55, 0.42, 0.2, 1)
-theme_override_font_sizes/font_size = 16
-text = ""
+theme_override_colors/font_color = Color(1, 0.93, 0.8, 1)
+theme_override_font_sizes/font_size = 18
+text = "正在进入…"
 horizontal_alignment = 1
 
-[node name="Tabs" type="HBoxContainer" parent="Center/Panel/VBox"]
-layout_mode = 2
-theme_override_constants/separation = 10
-alignment = 1
-
-[node name="ItemsTab" type="Button" parent="Center/Panel/VBox/Tabs"]
+[node name="Bar" type="ProgressBar" parent="LoadingOverlay/Center/Card/VBox" unique_id=616695509]
 unique_name_in_owner = true
-toggle_mode = true
-button_pressed = true
-custom_minimum_size = Vector2(150, 44)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("sb_btn")
-theme_override_styles/hover = SubResource("sb_btn")
-theme_override_styles/pressed = SubResource("sb_btn")
-text = "商品"
-
-[node name="QuotesTab" type="Button" parent="Center/Panel/VBox/Tabs"]
-unique_name_in_owner = true
-toggle_mode = true
-custom_minimum_size = Vector2(150, 44)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
-theme_override_font_sizes/font_size = 20
-theme_override_styles/normal = SubResource("sb_btn")
-theme_override_styles/hover = SubResource("sb_btn")
-theme_override_styles/pressed = SubResource("sb_btn")
-text = "收购价"
-
-[node name="ItemsScroll" type="ScrollContainer" parent="Center/Panel/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(520, 460)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="ItemsList" type="VBoxContainer" parent="Center/Panel/VBox/ItemsScroll"]
-unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 26)
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_constants/separation = 8
-theme_override_styles/panel = SubResource("sb_list")
+theme_override_styles/background = SubResource("sb_load_bar_bg")
+theme_override_styles/fill = SubResource("sb_load_stripe")
 
-[node name="QuotesScroll" type="ScrollContainer" parent="Center/Panel/VBox"]
-unique_name_in_owner = true
-visible = false
-custom_minimum_size = Vector2(520, 460)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="QuotesList" type="VBoxContainer" parent="Center/Panel/VBox/QuotesScroll"]
+[node name="Pct" type="Label" parent="LoadingOverlay/Center/Card/VBox" unique_id=290769963]
 unique_name_in_owner = true
 layout_mode = 2
-size_flags_horizontal = 3
-theme_override_constants/separation = 8
-theme_override_styles/panel = SubResource("sb_list")
-
-[node name="Hint" type="Label" parent="Center/Panel/VBox"]
-unique_name_in_owner = true
-visible = false
-layout_mode = 2
-theme_override_colors/font_color = Color(0.85, 0.3, 0.3, 1)
-theme_override_font_sizes/font_size = 16
-text = ""
+theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
+theme_override_font_sizes/font_size = 20
+text = "0%"
 horizontal_alignment = 1
-
-[node name="CloseButton" type="Button" parent="Center/Panel/VBox"]
-unique_name_in_owner = true
-custom_minimum_size = Vector2(220, 52)
-layout_mode = 2
-theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
-theme_override_font_sizes/font_size = 22
-theme_override_styles/normal = SubResource("sb_btn")
-theme_override_styles/hover = SubResource("sb_btn")
-text = "返回"

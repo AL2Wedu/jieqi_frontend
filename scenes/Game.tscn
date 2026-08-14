@@ -1,15 +1,15 @@
-[gd_scene load_steps=8 format=3]
+[gd_scene format=3 uid="uid://cufqs7dfxsfeb"]
 
-[ext_resource type="Script" path="res://scripts/game.gd" id="1_game"]
-[ext_resource type="PackedScene" path="res://scenes/farm/FarmWorld.tscn" id="2_world"]
+[ext_resource type="Script" uid="uid://mre2pf0i7dor" path="res://scripts/game.gd" id="1_game"]
+[ext_resource type="PackedScene" uid="uid://047w2ui8ml2q" path="res://scenes/farm/FarmWorld.tscn" id="2_world"]
 [ext_resource type="PackedScene" path="res://scenes/farm/TopBar.tscn" id="3_top"]
-[ext_resource type="PackedScene" path="res://scenes/farm/FarmGrid.tscn" id="4_grid"]
+[ext_resource type="PackedScene" uid="uid://0p4qxcmxrpk6" path="res://scenes/farm/FarmGrid.tscn" id="4_grid"]
 [ext_resource type="PackedScene" path="res://scenes/farm/SolarTermsBar.tscn" id="5_terms"]
 [ext_resource type="PackedScene" path="res://scenes/farm/BottomToolbar.tscn" id="6_toolbar"]
 [ext_resource type="PackedScene" path="res://scenes/farm/LandStatusPanel.tscn" id="7_status"]
 [ext_resource type="PackedScene" path="res://scenes/farm/NpcDialog.tscn" id="8_npc"]
 
-[node name="Game" type="Control"]
+[node name="Game" type="Control" unique_id=439103679]
 layout_mode = 3
 anchors_preset = 15
 anchor_right = 1.0
@@ -18,55 +18,100 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_game")
 
-[node name="FarmWorld" parent="." instance=ExtResource("2_world")]
+[node name="FarmWorld" parent="." unique_id=1338619365 instance=ExtResource("2_world")]
+layout_mode = 1
 
-[node name="ShopHotspot" type="Button" parent="."]
+[node name="ShopHotspot" type="Button" parent="." unique_id=591742879]
 unique_name_in_owner = true
+layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -228.0
 offset_top = 220.0
 offset_right = -48.0
 offset_bottom = 470.0
-focus_mode = 0
 tooltip_text = "商店"
+focus_mode = 0
 mouse_default_cursor_shape = 2
 
-[node name="StorageButton" type="Button" parent="."]
+[node name="StorageButton" type="Button" parent="." unique_id=1359302170]
 unique_name_in_owner = true
+layout_mode = 0
 anchor_left = 1.0
 anchor_right = 1.0
 offset_left = -124.0
 offset_top = 196.0
 offset_right = -20.0
 offset_bottom = 300.0
-focus_mode = 0
 tooltip_text = "收成仓"
+focus_mode = 0
 mouse_default_cursor_shape = 2
 
-[node name="FarmGrid" parent="." instance=ExtResource("4_grid")]
+[node name="FarmGrid" parent="." unique_id=981323211 instance=ExtResource("4_grid")]
 layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
 offset_left = 105.0
 offset_top = 331.0
 offset_right = -125.0
 offset_bottom = -119.0
-grow_horizontal = 2
-grow_vertical = 2
 
-[node name="TopBar" parent="." instance=ExtResource("3_top")]
+[node name="TopBar" parent="." unique_id=1625479359 instance=ExtResource("3_top")]
+layout_mode = 0
+anchors_preset = 0
+anchor_right = 0.0
+offset_left = 5.0
+offset_top = 5.0
+offset_right = 710.0
+offset_bottom = 194.0
+grow_horizontal = 1
 
-[node name="SolarTermsBar" parent="." instance=ExtResource("5_terms")]
+[node name="SolarTermsBar" parent="." unique_id=924886030 instance=ExtResource("5_terms")]
+layout_mode = 1
+anchors_preset = -1
+offset_left = -3.0
+offset_top = 47.76001
+offset_right = -3.0
+offset_bottom = 47.76001
+grow_horizontal = 1
+grow_vertical = 1
 
-[node name="BottomToolbar" parent="." instance=ExtResource("6_toolbar")]
+[node name="BottomToolbar" parent="." unique_id=980371035 instance=ExtResource("6_toolbar")]
+layout_mode = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 219.0
+offset_top = 1242.0
+offset_right = 719.0
+offset_bottom = 1392.0
+grow_horizontal = 1
+grow_vertical = 1
 
-[node name="LandStatusPanel" parent="." instance=ExtResource("7_status")]
+[node name="LandStatusPanel" parent="." unique_id=2063660561 instance=ExtResource("7_status")]
+layout_mode = 0
+anchors_preset = 0
+anchor_top = 0.0
+anchor_bottom = 0.0
+offset_left = -2.0
+offset_top = 1367.0
+offset_right = 258.0
+offset_bottom = 1523.0
+grow_vertical = 1
 
-[node name="NpcDialog" parent="." instance=ExtResource("8_npc")]
+[node name="NpcDialog" parent="." unique_id=693379889 instance=ExtResource("8_npc")]
+layout_mode = 0
+anchors_preset = 0
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 0.0
+anchor_bottom = 0.0
+offset_left = 372.0
+offset_top = 1395.0
+offset_right = 716.0
+offset_bottom = 1524.0
+grow_vertical = 1
 
-[node name="FeatureRail" type="VBoxContainer" parent="."]
+[node name="FeatureRail" type="VBoxContainer" parent="." unique_id=257763436]
 unique_name_in_owner = true
 layout_mode = 1
 offset_left = 10.0
