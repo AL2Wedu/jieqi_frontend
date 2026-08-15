@@ -85,7 +85,8 @@ func _ready() -> void:
 	_shop = SHOP.instantiate()
 	add_child(_shop)
 	_shop.visible = false
-	_shop.close_requested.connect(func() -> void: _shop.visible = false)
+	_shop.close_requested.connect(_on_shop_closed)
+	_shop.opened.connect(_on_shop_opened)
 	_shop.assets_changed.connect(_refresh_player_and_topbar)
 
 	# 商店入口热区（透明，悬停高亮）
@@ -328,7 +329,17 @@ func _on_pest_auto_submit(pest_id: String) -> void:
 
 func _open_shop() -> void:
 	_shop.open()
+
+
+## 商店打开完成（加载动画结束、内容可见）：教学第 4 步 → 第 5 步（指引关闭商店）。
+func _on_shop_opened() -> void:
 	_tutorial_advance(4)
+
+
+## 商店关闭：教学第 5 步 → 第 6 步（背包）。
+func _on_shop_closed() -> void:
+	_shop.visible = false
+	_tutorial_advance(5)
 
 
 ## 面板操作改变资产（购买/出售/领奖）后重拉 /player/me 刷顶栏。
@@ -361,19 +372,19 @@ func _build_feature_rail() -> void:
 	_make_rail_button("res://assets/icons/rail_背包.png", "背包",
 		func() -> void:
 			_inventory_panel.open()
-			_tutorial_advance(5))
+			_tutorial_advance(6))
 	_make_rail_button("res://assets/icons/rail_任务.png", "任务",
 		func() -> void:
 			_quests_panel.open()
-			_tutorial_advance(6))
+			_tutorial_advance(7))
 	_make_rail_button("res://assets/icons/rail_成就.png", "成就",
 		func() -> void:
 			_achievements_panel.open()
-			_tutorial_advance(7))
+			_tutorial_advance(8))
 	_make_rail_button("res://assets/icons/rail_好友.png", "好友",
 		func() -> void:
 			_social_panel.open()
-			_tutorial_advance(8))
+			_tutorial_advance(9))
 	_make_rail_button("res://assets/icons/settings.svg", "设置",
 		func() -> void: _settings_panel.open())
 
@@ -641,16 +652,18 @@ func _tutorial_show_step() -> void:
 		4:
 			_tutorial.point_at(_shop_hotspot, "去「商店」逛一圈，看看有什么好东西！")
 		5:
-			_tutorial.point_at(_feature_rail.get_child(0), "左排第一个是「背包」，点开看看你的家当～")
+			_tutorial.point_at(_shop.close_button(), "逛完啦，点「返回」回农场吧～")
 		6:
-			_tutorial.point_at(_feature_rail.get_child(1), "「任务」会告诉你接下来要做什么，点开瞅瞅～")
+			_tutorial.point_at(_feature_rail.get_child(0), "左排第一个是「背包」，点开看看你的家当～")
 		7:
-			_tutorial.point_at(_feature_rail.get_child(2), "「成就」记录你的每一个小里程碑，点开瞧瞧～")
+			_tutorial.point_at(_feature_rail.get_child(1), "「任务」会告诉你接下来要做什么，点开瞅瞅～")
 		8:
-			_tutorial.point_at(_feature_rail.get_child(3), "最后看看「好友」，可以拜访朋友的农场哦！")
+			_tutorial.point_at(_feature_rail.get_child(2), "「成就」记录你的每一个小里程碑，点开瞧瞧～")
 		9:
+			_tutorial.point_at(_feature_rail.get_child(3), "最后看看「好友」，可以拜访朋友的农场哦！")
+		10:
 			_tutorial.finish()
-			Backend.clear_tutorial_pending()
+			Backend.complete_tutorial()
 
 
 ## 玩家完成某一步实际操作后调用，推进到下一步。

@@ -4,9 +4,15 @@ extends Control
 
 signal close_requested
 signal assets_changed
+signal opened  # 打开完成（加载动画结束、内容可见）
 
 const LOAD_SECONDS := 4.0   # 加载动画时长（3-5s 区间）
 const FADE_SECONDS := 0.6   # 加载页淡出时长
+const WALK_IN_SECONDS := 2.6  # 动物从远处走近动画时长
+
+## 商店动物（情绪为开心）；进入商店随机挑一只走入。
+const ANIMALS := ["乌鸦", "企鹅", "兔", "刺猬", "松鼠", "浣熊", "熊", "熊猫", "牛", "狐狸",
+	"狗", "狗2", "狼", "猪", "猫", "猫2", "猫头鹰", "羊", "羊2", "老鼠", "青蛙", "马", "鸡", "鸭子", "鹿"]
 
 @onready var _title: Label = %Title
 @onready var _sub: Label = %Sub
@@ -14,8 +20,10 @@ const FADE_SECONDS := 0.6   # 加载页淡出时长
 @onready var _loading: Control = %LoadingOverlay
 @onready var _load_bar: ProgressBar = %Bar
 @onready var _load_pct: Label = %Pct
+@onready var _animal: TextureRect = %AnimalWalkIn
 
 var _busy := false  # 加载动画播放中（开或关），避免并发
+var _walk_tween: Tween = null
 
 
 func _ready() -> void:
@@ -33,6 +41,8 @@ func open() -> void:
 	_busy = true
 	await _play_loading("商 店", "咻地一下冲向商店！")
 	_busy = false
+	opened.emit()
+	_play_walk_in()
 
 
 ## 退出商店：立刻隐藏商店内容（只剩加载页盖住），动画结束再整个隐藏。
@@ -45,6 +55,11 @@ func close() -> void:
 	_busy = false
 	hide()
 	close_requested.emit()
+
+
+## 返回按钮（新手教学指向用）。
+func close_button() -> Button:
+	return _close
 
 
 ## 隐藏商店内容（保留加载页），避免淡出时商店闪现。
@@ -89,3 +104,25 @@ func _fade_loading() -> void:
 	tw.tween_property(_loading, "modulate:a", 0.0, FADE_SECONDS)
 	await tw.finished
 	_loading.visible = false
+
+
+## 随机一只动物从远处走近：初始透明且小（远景），逐渐变清晰、变大（近景）。
+## 素材从后端 /v1/assets/animals/ 实时获取（情绪：开心；进入商店随机挑一只）。
+func _play_walk_in() -> void:
+	var name: String = ANIMALS.pick_random()
+	var url := "%s/v1/assets/animals/开心/%s.png" % [Backend.base_url, name.uri_encode()]
+	var tex: Texture2D = await Backend.fetch_texture(url)
+	if tex == null:
+		return  # 素材拉不到则静默跳过动画
+	_animal.texture = tex
+	_animal.pivot_offset = Vector2(_animal.size.x / 2.0, _animal.size.y)  # 以脚底为中心放大
+	_animal.modulate.a = 0.0
+	_animal.scale = Vector2(0.12, 0.12)
+	_animal.visible = true
+	if _walk_tween != null:
+		_walk_tween.kill()
+	_walk_tween = create_tween()
+	_walk_tween.tween_property(_animal, "modulate:a", 1.0, WALK_IN_SECONDS) \
+		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
+	_walk_tween.parallel().tween_property(_animal, "scale", Vector2.ONE, WALK_IN_SECONDS) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

@@ -110,6 +110,18 @@ texture = ExtResource("3_scene")
 expand_mode = 1
 stretch_mode = 5
 
+[node name="AnimalWalkIn" type="TextureRect" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 240.0
+offset_top = 180.0
+offset_right = 480.0
+offset_bottom = 420.0
+mouse_filter = 2
+expand_mode = 1
+stretch_mode = 5
+
 [node name="Frame" type="TextureRect" parent="." unique_id=838434359]
 unique_name_in_owner = true
 layout_mode = 1
