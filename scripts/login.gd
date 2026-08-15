@@ -54,6 +54,9 @@ func _handle_auth_result(res: Dictionary, is_register: bool) -> void:
 
 	var data: Dictionary = res["data"]
 	Backend.on_login_success(str(data.get("token", "")), data.get("player", {}))
+	if is_register:
+		# 新注册用户：标记新手教学待展示
+		Backend.mark_tutorial_pending()
 	login_success.emit()
 
 

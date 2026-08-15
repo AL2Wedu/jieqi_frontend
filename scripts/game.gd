@@ -14,6 +14,7 @@ const QUESTS_PANEL := preload("res://scenes/farm/QuestsPanel.tscn")
 const ACHIEVEMENTS_PANEL := preload("res://scenes/farm/AchievementsPanel.tscn")
 const SOCIAL_PANEL := preload("res://scenes/farm/SocialPanel.tscn")
 const AI_CHAT_PANEL := preload("res://scenes/farm/AiChatPanel.tscn")
+const TUTORIAL := preload("res://scenes/farm/TutorialOverlay.tscn")
 
 @onready var _top_bar: TopBar = $TopBar
 @onready var _world: FarmWorld = $FarmWorld
@@ -46,6 +47,8 @@ var _achievements_panel: Control = null
 var _social_panel: Control = null
 var _ai_chat_panel: Control = null
 var _countdown_timer: Timer = null
+var _tutorial: Control = null
+var _tutorial_step := -1
 
 
 func _ready() -> void:
@@ -107,6 +110,11 @@ func _ready() -> void:
 	_storage_panel.close_requested.connect(func() -> void: _storage_panel.visible = false)
 	_storage_panel.assets_changed.connect(_refresh_player_and_topbar)
 
+	# 新手教学覆盖层
+	_tutorial = TUTORIAL.instantiate()
+	add_child(_tutorial)
+	_tutorial.visible = false
+
 	# 功能入口面板：背包 / 任务 / 成就 / 好友 / AI
 	_inventory_panel = _add_panel(INVENTORY_PANEL)
 	_quests_panel = _add_panel(QUESTS_PANEL)
@@ -120,6 +128,9 @@ func _ready() -> void:
 	_load_from_backend()
 	Backend.check_art_updates()  # 非阻塞：对比版本并缓存素材
 	Backend.ensure_ws()          # 直接进游戏（有本地 token）也要订阅节气广播
+
+	# 新手教学：注册后首进游戏展示
+	_maybe_start_tutorial()
 
 	# 节气剩余秒倒计时：每秒递减，到 0 重拉
 	_countdown_timer = Timer.new()
@@ -312,6 +323,7 @@ func _on_pest_auto_submit(pest_id: String) -> void:
 
 func _open_shop() -> void:
 	_shop.open()
+	_tutorial_advance()
 
 
 ## 面板操作改变资产（购买/出售/领奖）后重拉 /player/me 刷顶栏。
@@ -325,6 +337,7 @@ func _refresh_player_and_topbar() -> void:
 
 func _open_storage() -> void:
 	_storage_panel.open()
+	_tutorial_advance()
 
 
 ## 统一挂载弹窗面板：隐藏 + 关连接 + 资产变更刷新。
@@ -483,6 +496,7 @@ func _on_crop_picked(seed_item: Dictionary) -> void:
 	var res := await Backend.sow(plot_id, crop_id)
 	if res.get("code", -1) == 0:
 		_npc.set_message("播种成功，记得按时浇水施肥～")
+		_tutorial_advance()
 		_after_operation()
 	else:
 		_npc.set_message(Backend.friendly_message(res, "播种失败"))
@@ -496,6 +510,7 @@ func _on_water_pressed(plot_id: String) -> void:
 	var res := await Backend.water(plot_id)
 	if res.get("code", -1) == 0:
 		_npc.set_message("浇灌完成，土壤湿润起来啦～")
+		_tutorial_advance()
 		_after_operation()
 	else:
 		_npc.set_message(Backend.friendly_message(res, "浇水失败"))
@@ -583,6 +598,41 @@ func _has_item(item_id: String) -> bool:
 		if str(item.get("item_id", "")) == item_id and int(item.get("quantity", 0)) > 0:
 			return true
 	return false
+
+
+## ---------------- 新手教学 ----------------
+
+## 注册后首进游戏时展示新手引导（功能一览，实际操作推进）。
+func _maybe_start_tutorial() -> void:
+	if not Backend.is_tutorial_pending():
+		return
+	_tutorial_step = 0
+	_tutorial.visible = true
+	_tutorial_show_step()
+
+
+## 展示当前教学步骤：手指指向对应功能，文字提示"试试看"。
+func _tutorial_show_step() -> void:
+	match _tutorial_step:
+		0:
+			_tutorial.point_at(_toolbar.get_action_button("播种"), "咻～点一下「播种」，种下你的第一颗小苗苗吧！")
+		1:
+			_tutorial.point_at(_toolbar.get_action_button("灌溉"), "小苗苗想喝水啦，试试「灌溉」润一润～")
+		2:
+			_tutorial.point_at(_storage_button, "收获的宝贝都藏在「收成仓」里，悄悄点开看看～")
+		3:
+			_tutorial.point_at(_shop_hotspot, "最后去「商店」逛一圈，看看有什么好东西！")
+		4:
+			_tutorial.finish()
+			Backend.clear_tutorial_pending()
+
+
+## 玩家完成某一步实际操作后调用，推进到下一步。
+func _tutorial_advance() -> void:
+	if not _tutorial.visible or _tutorial_step < 0:
+		return
+	_tutorial_step += 1
+	_tutorial_show_step()
 
 
 func _refresh_top_bar() -> void:

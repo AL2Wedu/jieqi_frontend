@@ -760,6 +760,21 @@ func is_sfx_enabled() -> bool:
 	return bool(settings.get("sfx", true))
 
 
+## 新手教学标记：注册成功时置位，教学完成后清除。
+func is_tutorial_pending() -> bool:
+	return bool(settings.get("tutorial_pending", false))
+
+
+func mark_tutorial_pending() -> void:
+	settings["tutorial_pending"] = true
+	save_settings()
+
+
+func clear_tutorial_pending() -> void:
+	settings["tutorial_pending"] = false
+	save_settings()
+
+
 func _save_to_file(data: Dictionary) -> void:
 	_save_json_file(SAVE_PATH, data)
 

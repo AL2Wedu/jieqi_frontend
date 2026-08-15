@@ -14,16 +14,25 @@ const ACTIONS := [
 
 @onready var _row: HBoxContainer = %Row
 
+var _buttons: Dictionary = {}  # action_name -> Button
+
 
 func _ready() -> void:
 	for i in ACTIONS.size():
-		_row.add_child(_make_button(ACTIONS[i]))
+		_make_button(ACTIONS[i])
+
+
+## 取某操作按钮（供新手教学手指定位）。
+func get_action_button(action_name: String) -> Button:
+	return _buttons.get(action_name)
 
 
 func _make_button(data: Dictionary) -> Button:
 	var btn := Button.new()
 	btn.custom_minimum_size = Vector2(88, 84)
 	btn.focus_mode = Control.FOCUS_NONE
+	_buttons[data["name"]] = btn
+	_row.add_child(btn)
 
 	var box := VBoxContainer.new()
 	box.alignment = BoxContainer.ALIGNMENT_CENTER
