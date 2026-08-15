@@ -328,7 +328,7 @@ func _on_pest_auto_submit(pest_id: String) -> void:
 
 func _open_shop() -> void:
 	_shop.open()
-	_tutorial_advance()
+	_tutorial_advance(4)
 
 
 ## 面板操作改变资产（购买/出售/领奖）后重拉 /player/me 刷顶栏。
@@ -342,7 +342,7 @@ func _refresh_player_and_topbar() -> void:
 
 func _open_storage() -> void:
 	_storage_panel.open()
-	_tutorial_advance()
+	_tutorial_advance(3)
 
 
 ## 统一挂载弹窗面板：隐藏 + 关连接 + 资产变更刷新。
@@ -359,13 +359,21 @@ func _add_panel(scene: PackedScene) -> Control:
 ## 左侧功能入口竖列：背包 / 任务 / 成就 / 好友 / 设置。
 func _build_feature_rail() -> void:
 	_make_rail_button("res://assets/icons/rail_背包.png", "背包",
-		func() -> void: _inventory_panel.open())
+		func() -> void:
+			_inventory_panel.open()
+			_tutorial_advance(5))
 	_make_rail_button("res://assets/icons/rail_任务.png", "任务",
-		func() -> void: _quests_panel.open())
+		func() -> void:
+			_quests_panel.open()
+			_tutorial_advance(6))
 	_make_rail_button("res://assets/icons/rail_成就.png", "成就",
-		func() -> void: _achievements_panel.open())
+		func() -> void:
+			_achievements_panel.open()
+			_tutorial_advance(7))
 	_make_rail_button("res://assets/icons/rail_好友.png", "好友",
-		func() -> void: _social_panel.open())
+		func() -> void:
+			_social_panel.open()
+			_tutorial_advance(8))
 	_make_rail_button("res://assets/icons/settings.svg", "设置",
 		func() -> void: _settings_panel.open())
 
@@ -503,7 +511,7 @@ func _on_crop_picked(seed_item: Dictionary) -> void:
 	var res := await Backend.sow(plot_id, crop_id)
 	if res.get("code", -1) == 0:
 		_npc.set_message("播种成功，记得按时浇水施肥～")
-		_tutorial_advance()
+		_tutorial_advance(0)
 		_after_operation()
 	else:
 		_npc.set_message(Backend.friendly_message(res, "播种失败"))
@@ -517,7 +525,7 @@ func _on_water_pressed(plot_id: String) -> void:
 	var res := await Backend.water(plot_id)
 	if res.get("code", -1) == 0:
 		_npc.set_message("浇灌完成，土壤湿润起来啦～")
-		_tutorial_advance()
+		_tutorial_advance(1)
 		_after_operation()
 	else:
 		_npc.set_message(Backend.friendly_message(res, "浇水失败"))
@@ -548,6 +556,7 @@ func _on_fertilize_pressed(plot_id: String) -> void:
 	var res := await Backend.use_item(_fertilizer_item_id, plot_id)
 	if res.get("code", -1) == 0:
 		_npc.set_message("施过肥了，作物更有劲啦～")
+		_tutorial_advance(2)
 		_after_operation()
 	else:
 		_npc.set_message(Backend.friendly_message(res, "施肥失败"))
@@ -626,17 +635,30 @@ func _tutorial_show_step() -> void:
 		1:
 			_tutorial.point_at(_toolbar.get_action_button("灌溉"), "小苗苗想喝水啦，试试「灌溉」润一润～")
 		2:
-			_tutorial.point_at(_storage_button, "收获的宝贝都藏在「收成仓」里，悄悄点开看看～")
+			_tutorial.point_at(_toolbar.get_action_button("施肥"), "再施点肥，小苗苗能长得更壮哦～")
 		3:
-			_tutorial.point_at(_shop_hotspot, "最后去「商店」逛一圈，看看有什么好东西！")
+			_tutorial.point_at(_storage_button, "收获的宝贝都藏在「收成仓」里，悄悄点开看看～")
 		4:
+			_tutorial.point_at(_shop_hotspot, "去「商店」逛一圈，看看有什么好东西！")
+		5:
+			_tutorial.point_at(_feature_rail.get_child(0), "左排第一个是「背包」，点开看看你的家当～")
+		6:
+			_tutorial.point_at(_feature_rail.get_child(1), "「任务」会告诉你接下来要做什么，点开瞅瞅～")
+		7:
+			_tutorial.point_at(_feature_rail.get_child(2), "「成就」记录你的每一个小里程碑，点开瞧瞧～")
+		8:
+			_tutorial.point_at(_feature_rail.get_child(3), "最后看看「好友」，可以拜访朋友的农场哦！")
+		9:
 			_tutorial.finish()
 			Backend.clear_tutorial_pending()
 
 
 ## 玩家完成某一步实际操作后调用，推进到下一步。
-func _tutorial_advance() -> void:
+## expected 为当前期望步骤（可选）：不匹配则忽略，防误点跳步。
+func _tutorial_advance(expected := -1) -> void:
 	if not _tutorial.visible or _tutorial_step < 0:
+		return
+	if expected >= 0 and _tutorial_step != expected:
 		return
 	_tutorial_step += 1
 	_tutorial_show_step()
