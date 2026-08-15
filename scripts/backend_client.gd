@@ -10,6 +10,7 @@ var ws_url := ""
 
 const SAVE_PATH := "user://player.json"
 const ART_VERSION_FILE := "user://art_version.json"
+const ASSET_VERSION_FILE := "user://asset_version.json"
 const SETTINGS_FILE := "user://settings.json"
 const REQUEST_TIMEOUT := 10
 const TERM_POLL_SECONDS := 20.0
@@ -254,6 +255,21 @@ func register(name: String, password: String) -> Dictionary:
 	return await request("POST", "/auth/register", { "name": name, "password": password }, false)
 
 
+## 改名（POST /player/rename，限速 rename.cooldown_seconds 默认 7 天）。
+func rename(new_name: String) -> Dictionary:
+	return await request("POST", "/player/rename", { "new_name": new_name })
+
+
+## 注销账号（POST /auth/deactivate，需当前密码 + confirm=true，留档冻结）。
+func deactivate(password: String) -> Dictionary:
+	return await request("POST", "/auth/deactivate", { "password": password, "confirm": true })
+
+
+## 兑换码兑换（POST /redeem，限速 + 哈希匹配 + 原子抢占，奖励走账本）。
+func redeem(code: String) -> Dictionary:
+	return await request("POST", "/redeem", { "code": code })
+
+
 ## 登录/注册成功后接入（保存 token、启动 WS、拉取节气、检查素材更新）。
 func on_login_success(new_token: String, new_player: Dictionary) -> void:
 	token = new_token
@@ -457,6 +473,11 @@ func get_art_version() -> Dictionary:
 	return await request("GET", "/art/version", {}, false)
 
 
+## 拉取全量资源清单（crops + terms + url_templates + version）。
+func get_art_manifest() -> Dictionary:
+	return await request("GET", "/art/manifest", {}, false)
+
+
 ## 取某作物某素材：优先本地缓存，未命中则下载并缓存。
 ## name: "seed" / "1" / "2" / "3"；w 为目标像素。
 func get_art_texture(slug: String, name: String, w: int) -> Texture2D:
@@ -543,6 +564,110 @@ func _art_cache_path(slug: String, name: String, w: int) -> String:
 	if _cache_version == "":
 		return ""
 	return "user://art_cache/%s/%s_%s_%d.png" % [_cache_version, slug, name, w]
+
+
+## ---------------- 全量资源缓存（首载进度条） ----------------
+
+## 首载时全量下载并缓存所有在线资源（作物图 + 节气图 + 音频 + 配置）。
+## on_progress(done, total) 每完成一个文件回调；返回是否成功/已是最新。
+## 之后启动对比本地 version，一致则跳过。缓存到 user://asset_cache/{version}/。
+func cache_all_assets(on_progress: Callable = Callable()) -> bool:
+	var man := await get_art_manifest()
+	if man.get("code", -1) != 0:
+		return false
+	var data: Dictionary = man["data"]
+	var version := str(data.get("version", ""))
+	var local := _load_json_file(ASSET_VERSION_FILE)
+	if str(local.get("version", "")) == version:
+		_cache_version = version
+		return true  # 已是最新，跳过
+
+	_cache_version = version
+	var dir := "user://asset_cache/%s" % version
+	DirAccess.make_dir_recursive_absolute(dir)
+
+	# 收集下载任务列表
+	var tasks: Array[Dictionary] = []
+	for crop in data.get("crops", []):
+		var slug := str(crop.get("slug", ""))
+		for nm in crop.get("assets", ["seed", "1", "2", "3"]):
+			tasks.append({ "kind": "crop", "slug": slug, "name": nm, "w": 64 if nm == "seed" else 128 })
+	for term in data.get("terms", []):
+		tasks.append({ "kind": "term", "index": int(term.get("index", 0)) })
+	# 音频/配置：/v1/assets 通用接口（当前仅占位，接口已备好）
+	tasks.append({ "kind": "audio", "key": "bgm", "name": "main", "ext": "wav" })
+	tasks.append({ "kind": "config", "key": "terms", "name": "welcome", "ext": "json" })
+
+	var total := tasks.size()
+	var done := 0
+	for t in tasks:
+		var url := ""
+		var cache_rel := ""
+		match t.kind:
+			"crop":
+				url = "%s/v1/art/crops/%s/%s.png?w=%d" % [base_url, t.slug, t.name, t.w]
+				cache_rel = "crops/%s_%s_%d.png" % [t.slug, t.name, t.w]
+			"term":
+				url = "%s/v1/art/terms/%d/main.png?w=128" % [base_url, t.index]
+				cache_rel = "terms/%d_main_128.png" % t.index
+			"audio":
+				url = "%s/v1/assets/audio/%s/%s.%s" % [base_url, t.key, t.name, t.ext]
+				cache_rel = "audio/%s_%s.%s" % [t.key, t.name, t.ext]
+			"config":
+				url = "%s/v1/assets/config/%s/%s.%s" % [base_url, t.key, t.name, t.ext]
+				cache_rel = "config/%s_%s.%s" % [t.key, t.name, t.ext]
+		if url == "":
+			done += 1
+			continue
+		var bytes := await _download_png(url)
+		if not bytes.is_empty():
+			var dest := "%s/%s" % [dir, cache_rel]
+			DirAccess.make_dir_recursive_absolute(dest.get_base_dir())
+			_save_file(dest, bytes)
+		done += 1
+		if on_progress.is_valid():
+			on_progress.call(done, total)
+
+	_save_json_file(ASSET_VERSION_FILE, { "version": version })
+	return true
+
+
+## 从全量缓存读贴图（相对路径，如 crops/shuidao_2_128.png）。
+func get_cached_texture(rel_path: String) -> Texture2D:
+	var path := "user://asset_cache/%s/%s" % [_cache_version, rel_path]
+	if FileAccess.file_exists(path):
+		var tex := _texture_from_file(path)
+		if tex != null:
+			return tex
+	return null
+
+
+## 取节气牌贴图（优先缓存，缺失则按需下载并缓存）。
+func get_term_texture(index: int) -> Texture2D:
+	var rel := "terms/%d_main_128.png" % (index + 1)
+	var tex := get_cached_texture(rel)
+	if tex != null:
+		return tex
+	# 兜底：按需下载（slugs 与 index 映射见 top_bar）
+	var url := "%s/v1/art/terms/%d/main.png?w=128" % [base_url, index + 1]
+	var bytes := await _download_png(url)
+	if bytes.is_empty():
+		return null
+	if _cache_version != "":
+		var dest := "user://asset_cache/%s/terms/%d_main_128.png" % [_cache_version, index + 1]
+		DirAccess.make_dir_recursive_absolute(dest.get_base_dir())
+		_save_file(dest, bytes)
+	return _texture_from_bytes(bytes)
+
+
+## 下载任意 /v1/assets 音频为原始字节（供 Music 后台拉高音质）。
+func download_audio(key: String, name: String, ext: String) -> PackedByteArray:
+	return await _download_png("%s/v1/assets/audio/%s/%s.%s" % [base_url, key, name, ext])
+
+
+## 保存原始字节到 user:// 路径（供 Music 缓存 wav 等）。
+func save_bytes(path: String, bytes: PackedByteArray) -> void:
+	_save_file(path, bytes)
 
 
 func _texture_from_file(path: String) -> Texture2D:
@@ -763,19 +888,17 @@ func is_sfx_enabled() -> bool:
 	return bool(settings.get("sfx", true))
 
 
-## 新手教学标记：注册成功时置位，教学完成后清除。
+## 新手教学状态：以后端 player.tutorial 为权威（默认 True，注册后待教学）。
 func is_tutorial_pending() -> bool:
-	return bool(settings.get("tutorial_pending", false))
+	return bool(player.get("tutorial", true))
 
 
-func mark_tutorial_pending() -> void:
-	settings["tutorial_pending"] = true
-	save_settings()
-
-
-func clear_tutorial_pending() -> void:
-	settings["tutorial_pending"] = false
-	save_settings()
+## 结束新手教学：本地先置 false（乐观），再调后端接口恢复正常世界/虫害。
+## 后端幂等（already_completed），fire-and-forget 调用也安全。
+func complete_tutorial() -> void:
+	player["tutorial"] = false
+	save_local()
+	await request("POST", "/player/tutorial/complete")
 
 
 func _save_to_file(data: Dictionary) -> void:

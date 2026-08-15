@@ -9,6 +9,9 @@ const SETTINGS_PANEL := preload("res://scenes/SettingsPanel.tscn")
 @onready var _start_button: Button = $MenuBox/VBoxContainer/StartButton
 @onready var _settings_button: Button = $MenuBox/VBoxContainer/SettingsButton
 @onready var _quit_button: Button = $MenuBox/VBoxContainer/QuitButton
+@onready var _loading: Control = %LoadingOverlay
+@onready var _load_bar: ProgressBar = %Bar
+@onready var _load_pct: Label = %Pct
 
 var _settings_panel: Control = null
 
@@ -26,6 +29,29 @@ func _ready() -> void:
 
 	for btn in [_start_button, _settings_button, _quit_button]:
 		_style_press(btn)
+
+	_run_startup_cache()
+
+
+## 首载在线缓存：隐藏按钮 + 显示进度条，缓存完成后再显示按钮。
+func _run_startup_cache() -> void:
+	_loading.visible = true
+	_start_button.visible = false
+	_settings_button.visible = false
+	_quit_button.visible = false
+	_load_bar.value = 0.0
+	_load_pct.text = "0%"
+	await Backend.cache_all_assets(func(done: int, total: int) -> void:
+		if _load_bar == null:
+			return
+		_load_bar.max_value = total
+		_load_bar.value = done
+		_load_pct.text = "%d%%" % int(done * 100.0 / maxi(total, 1)))
+	# 缓存完成（或已是最新）：显示按钮
+	_loading.visible = false
+	_start_button.visible = true
+	_settings_button.visible = true
+	_quit_button.visible = true
 
 
 ## 按钮按压反馈：按下轻微缩小、抬起回弹。

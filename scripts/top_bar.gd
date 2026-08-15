@@ -1,34 +1,12 @@
 class_name TopBar
 extends PanelContainer
 ## 顶部信息栏：季节牌 + 日期天气湿度 + 资源。
-## 季节牌按节气切换（24 张真实素材）。
+## 季节牌按节气切换，贴图在线获取并缓存（首载进度条预热，缺失时按需下载）。
 
-const TERM_TEXTURES: Array[Texture2D] = [
-	preload("res://assets/terms/lichun.png"),        # 立春
-	preload("res://assets/terms/yushui.png"),        # 雨水
-	preload("res://assets/terms/jingzhe.png"),       # 惊蛰
-	preload("res://assets/terms/chunfen.png"),       # 春分
-	preload("res://assets/terms/qingming.png"),      # 清明
-	preload("res://assets/terms/guyu.png"),          # 谷雨
-	preload("res://assets/terms/lixia.png"),         # 立夏
-	preload("res://assets/terms/xiaoman.png"),       # 小满
-	preload("res://assets/terms/mangzhong.png"),     # 芒种
-	preload("res://assets/terms/xiazhi.png"),        # 夏至
-	preload("res://assets/terms/xiaoshu.png"),       # 小暑
-	preload("res://assets/terms/dashu.png"),         # 大暑
-	preload("res://assets/terms/liqiu.png"),         # 立秋
-	preload("res://assets/terms/chushu.png"),        # 处暑
-	preload("res://assets/terms/bailu.png"),         # 白露
-	preload("res://assets/terms/qiufen.png"),        # 秋分
-	preload("res://assets/terms/hanlu.png"),         # 寒露
-	preload("res://assets/terms/shuangjiang.png"),   # 霜降
-	preload("res://assets/terms/lidong.png"),        # 立冬
-	preload("res://assets/terms/xiaoxue.png"),       # 小雪
-	preload("res://assets/terms/daxue.png"),         # 大雪
-	preload("res://assets/terms/dongzhi.png"),       # 冬至
-	preload("res://assets/terms/xiaohan.png"),       # 小寒
-	preload("res://assets/terms/dahan.png"),         # 大寒
-]
+const TERM_NAMES := ["立春","雨水","惊蛰","春分","清明","谷雨",
+	"立夏","小满","芒种","夏至","小暑","大暑",
+	"立秋","处暑","白露","秋分","寒露","霜降",
+	"立冬","小雪","大雪","冬至","小寒","大寒"]
 
 @onready var _plaque: TextureRect = %SeasonPlaque
 @onready var _date_label: Label = %DateLabel
@@ -43,11 +21,17 @@ const TERM_TEXTURES: Array[Texture2D] = [
 @onready var _exp_label: Label = %ExpValue
 
 
-## 设置季节牌贴图（term_index 0-23，按节气切换）。
+## 设置季节牌贴图（term_index 0-23，按节气切换）。异步在线获取。
 func set_season(term_index: int) -> void:
-	if term_index < 0 or term_index >= TERM_TEXTURES.size():
+	if term_index < 0 or term_index >= TERM_NAMES.size():
 		return
-	_plaque.texture = TERM_TEXTURES[term_index]
+	_load_plaque(term_index)
+
+
+func _load_plaque(term_index: int) -> void:
+	var tex := await Backend.get_term_texture(term_index)
+	if tex != null and is_instance_valid(self):
+		_plaque.texture = tex
 
 
 func set_date(date_text: String) -> void:
@@ -81,14 +65,9 @@ func set_exp(exp: int, exp_next: int = 0) -> void:
 
 ## 解锁节气（term_index 0-23）。
 func set_unlocked_term(term_index: int) -> void:
-	if term_index < 0 or term_index >= TERM_TEXTURES.size():
+	if term_index < 0 or term_index >= TERM_NAMES.size():
 		return
-	_unlocked_label.text = "解锁至：%s" % [
-		"立春","雨水","惊蛰","春分","清明","谷雨",
-		"立夏","小满","芒种","夏至","小暑","大暑",
-		"立秋","处暑","白露","秋分","寒露","霜降",
-		"立冬","小雪","大雪","冬至","小寒","大寒",
-	][term_index]
+	_unlocked_label.text = "解锁至：%s" % TERM_NAMES[term_index]
 
 
 ## 本轮节气剩余秒倒计时（秒）。
