@@ -338,18 +338,16 @@ func _add_panel(scene: PackedScene) -> Control:
 	return p
 
 
-## 左侧功能入口竖列：背包 / 任务 / 成就 / 好友 / AI。
+## 左侧功能入口竖列：背包 / 任务 / 成就 / 好友。
 func _build_feature_rail() -> void:
-	_make_rail_button("res://assets/icons/resource_farmer.svg", "背包",
+	_make_rail_button("res://assets/icons/rail_背包.png", "背包",
 		func() -> void: _inventory_panel.open())
-	_make_rail_button("res://assets/icons/term_flower.svg", "任务",
+	_make_rail_button("res://assets/icons/rail_任务.png", "任务",
 		func() -> void: _quests_panel.open())
-	_make_rail_button("res://assets/icons/stat_leaf.svg", "成就",
+	_make_rail_button("res://assets/icons/rail_成就.png", "成就",
 		func() -> void: _achievements_panel.open())
-	_make_rail_button("res://assets/icons/npc_cat.png", "好友",
+	_make_rail_button("res://assets/icons/rail_好友.png", "好友",
 		func() -> void: _social_panel.open())
-	_make_rail_button("res://assets/icons/term_current.svg", "节气助手",
-		func() -> void: _ai_chat_panel.open())
 
 
 func _make_rail_button(icon_path: String, tooltip: String, callback: Callable) -> void:

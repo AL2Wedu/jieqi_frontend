@@ -86,13 +86,13 @@ grow_horizontal = 2
 grow_vertical = 0
 mouse_filter = 2
 
-[node name="BottomToolbar" parent="BottomBar" unique_id=980371035 instance=ExtResource("6_toolbar")]
-layout_mode = 1
-
 [node name="LandStatusPanel" parent="BottomBar" unique_id=2063660561 instance=ExtResource("7_status")]
 layout_mode = 1
 
 [node name="NpcDialog" parent="BottomBar" unique_id=693379889 instance=ExtResource("8_npc")]
+layout_mode = 1
+
+[node name="BottomToolbar" parent="BottomBar" unique_id=980371035 instance=ExtResource("6_toolbar")]
 layout_mode = 1
 
 [node name="FeatureRail" type="VBoxContainer" parent="." unique_id=257763436]
