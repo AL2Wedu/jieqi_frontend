@@ -26,6 +26,8 @@ signal pest_destroyed_event(payload: Dictionary)
 signal crop_withered_event(payload: Dictionary)
 signal weed_growth_event(payload: Dictionary)
 signal auth_expired
+## 音乐开关变化（设置面板改时发出，供 Music 单例响应）。
+signal music_enabled_changed(on: bool)
 
 var token := ""
 var player: Dictionary = {}
@@ -745,6 +747,7 @@ func set_server(address: String) -> void:
 func set_music_enabled(on: bool) -> void:
 	settings["music"] = on
 	save_settings()
+	music_enabled_changed.emit(on)
 
 
 func set_sfx_enabled(on: bool) -> void:
