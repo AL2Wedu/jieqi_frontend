@@ -14,6 +14,7 @@ const QUESTS_PANEL := preload("res://scenes/farm/QuestsPanel.tscn")
 const ACHIEVEMENTS_PANEL := preload("res://scenes/farm/AchievementsPanel.tscn")
 const SOCIAL_PANEL := preload("res://scenes/farm/SocialPanel.tscn")
 const AI_CHAT_PANEL := preload("res://scenes/farm/AiChatPanel.tscn")
+const SETTINGS_PANEL := preload("res://scenes/SettingsPanel.tscn")
 const TUTORIAL := preload("res://scenes/farm/TutorialOverlay.tscn")
 
 @onready var _top_bar: TopBar = $TopBar
@@ -46,6 +47,7 @@ var _quests_panel: Control = null
 var _achievements_panel: Control = null
 var _social_panel: Control = null
 var _ai_chat_panel: Control = null
+var _settings_panel: Control = null
 var _countdown_timer: Timer = null
 var _tutorial: Control = null
 var _tutorial_step := -1
@@ -121,6 +123,9 @@ func _ready() -> void:
 	_achievements_panel = _add_panel(ACHIEVEMENTS_PANEL)
 	_social_panel = _add_panel(SOCIAL_PANEL)
 	_ai_chat_panel = _add_panel(AI_CHAT_PANEL)
+	_settings_panel = _add_panel(SETTINGS_PANEL)
+	_settings_panel.logged_out.connect(func() -> void:
+		back_to_menu_requested.emit.call_deferred())
 	_build_feature_rail()
 
 	_refresh_top_bar()
@@ -351,7 +356,7 @@ func _add_panel(scene: PackedScene) -> Control:
 	return p
 
 
-## 左侧功能入口竖列：背包 / 任务 / 成就 / 好友。
+## 左侧功能入口竖列：背包 / 任务 / 成就 / 好友 / 设置。
 func _build_feature_rail() -> void:
 	_make_rail_button("res://assets/icons/rail_背包.png", "背包",
 		func() -> void: _inventory_panel.open())
@@ -361,6 +366,8 @@ func _build_feature_rail() -> void:
 		func() -> void: _achievements_panel.open())
 	_make_rail_button("res://assets/icons/rail_好友.png", "好友",
 		func() -> void: _social_panel.open())
+	_make_rail_button("res://assets/icons/settings.svg", "设置",
+		func() -> void: _settings_panel.open())
 
 
 func _make_rail_button(icon_path: String, tooltip: String, callback: Callable) -> void:
@@ -654,7 +661,7 @@ func _unhandled_input(event: InputEvent) -> void:
 		if _shop != null and _shop.visible:
 			_shop.close()
 			return
-		for panel in [_ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
+		for panel in [_settings_panel, _ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
 				_inventory_panel, _storage_panel, _crop_picker]:
 			if panel != null and panel.visible:
 				panel.visible = false
@@ -670,7 +677,7 @@ func handle_android_back() -> bool:
 	if _shop != null and _shop.visible:
 		_shop.close()
 		return true
-	for panel in [_ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
+	for panel in [_settings_panel, _ai_chat_panel, _social_panel, _achievements_panel, _quests_panel,
 			_inventory_panel, _storage_panel, _crop_picker]:
 		if panel != null and panel.visible:
 			panel.visible = false

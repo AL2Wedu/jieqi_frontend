@@ -234,6 +234,99 @@ layout_mode = 2
 theme_override_font_sizes/font_size = 18
 button_pressed = true
 
+[node name="RedeemBox" type="PanelContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("sb_box")
+
+[node name="VB3" type="VBoxContainer" parent="Center/Panel/VBox/RedeemBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RedeemLabel" type="Label" parent="Center/Panel/VBox/RedeemBox/VB3"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 18
+text = "兑换码"
+
+[node name="RedeemRow" type="HBoxContainer" parent="Center/Panel/VBox/RedeemBox/VB3"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RedeemInput" type="LineEdit" parent="Center/Panel/VBox/RedeemBox/VB3/RedeemRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_styles/normal = SubResource("sb_input")
+theme_override_font_sizes/font_size = 18
+placeholder_text = "输入兑换码"
+
+[node name="RedeemBtn" type="Button" parent="Center/Panel/VBox/RedeemBox/VB3/RedeemRow"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("sb_btn")
+theme_override_styles/hover = SubResource("sb_btn_hover")
+theme_override_styles/pressed = SubResource("sb_btn_hover")
+theme_override_styles/focus = SubResource("sb_btn")
+text = "兑换"
+
+[node name="RedeemStatus" type="Label" parent="Center/Panel/VBox/RedeemBox/VB3"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.42, 0.07, 1)
+theme_override_font_sizes/font_size = 15
+text = ""
+
+[node name="AccountBox" type="PanelContainer" parent="Center/Panel/VBox"]
+layout_mode = 2
+theme_override_styles/panel = SubResource("sb_box")
+
+[node name="VB4" type="VBoxContainer" parent="Center/Panel/VBox/AccountBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AccountLabel" type="Label" parent="Center/Panel/VBox/AccountBox/VB4"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 18
+text = "个人管理"
+
+[node name="UidLabel" type="Label" parent="Center/Panel/VBox/AccountBox/VB4"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.55, 0.42, 0.2, 1)
+theme_override_font_sizes/font_size = 15
+text = "用户ID：-"
+
+[node name="AccountRow" type="HBoxContainer" parent="Center/Panel/VBox/AccountBox/VB4"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="RenameBtn" type="Button" parent="Center/Panel/VBox/AccountBox/VB4/AccountRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("sb_btn")
+theme_override_styles/hover = SubResource("sb_btn_hover")
+theme_override_styles/pressed = SubResource("sb_btn_hover")
+theme_override_styles/focus = SubResource("sb_btn")
+text = "改名"
+
+[node name="DeleteBtn" type="Button" parent="Center/Panel/VBox/AccountBox/VB4/AccountRow"]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("sb_btn_danger")
+theme_override_styles/hover = SubResource("sb_btn_danger")
+theme_override_styles/pressed = SubResource("sb_btn_danger")
+theme_override_styles/focus = SubResource("sb_btn_danger")
+text = "注销账号"
+
 [node name="LogoutButton" type="Button" parent="Center/Panel/VBox"]
 unique_name_in_owner = true
 layout_mode = 2
@@ -272,3 +365,81 @@ theme_override_styles/hover = SubResource("sb_btn_hover")
 theme_override_styles/pressed = SubResource("sb_btn_hover")
 theme_override_styles/focus = SubResource("sb_btn")
 text = "返回"
+
+[node name="ConfirmOverlay" type="Control" parent="."]
+unique_name_in_owner = true
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="ConfirmDim" type="ColorRect" parent="ConfirmOverlay"]
+unique_name_in_owner = true
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 0
+color = Color(0, 0, 0, 0.55)
+
+[node name="Center" type="CenterContainer" parent="ConfirmOverlay"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+
+[node name="Panel" type="PanelContainer" parent="ConfirmOverlay/Center"]
+custom_minimum_size = Vector2(420, 0)
+layout_mode = 2
+theme_override_styles/panel = SubResource("sb_panel")
+
+[node name="VBox" type="VBoxContainer" parent="ConfirmOverlay/Center/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="ConfirmText" type="Label" parent="ConfirmOverlay/Center/Panel/VBox"]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 20
+text = "确定要执行此操作吗？"
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="Row" type="HBoxContainer" parent="ConfirmOverlay/Center/Panel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="ConfirmCancel" type="Button" parent="ConfirmOverlay/Center/Panel/VBox/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_btn")
+theme_override_styles/hover = SubResource("sb_btn_hover")
+theme_override_styles/pressed = SubResource("sb_btn_hover")
+theme_override_styles/focus = SubResource("sb_btn")
+text = "取消"
+
+[node name="ConfirmOk" type="Button" parent="ConfirmOverlay/Center/Panel/VBox/Row"]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(150, 48)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_btn_danger")
+theme_override_styles/hover = SubResource("sb_btn_danger")
+theme_override_styles/pressed = SubResource("sb_btn_danger")
+theme_override_styles/focus = SubResource("sb_btn_danger")
+text = "确认"

@@ -22,6 +22,7 @@ func _ready() -> void:
 	add_child(_settings_panel)
 	_settings_panel.visible = false
 	_settings_panel.close_requested.connect(func() -> void: _settings_panel.visible = false)
+	_settings_panel.logged_out.connect(func() -> void: _settings_panel.visible = false)
 
 	for btn in [_start_button, _settings_button, _quit_button]:
 		_style_press(btn)
