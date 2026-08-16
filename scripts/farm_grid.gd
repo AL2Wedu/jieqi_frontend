@@ -9,12 +9,16 @@ signal pest_expired(plot_id: String)
 const FARM_PLOT := preload("res://scenes/farm/FarmPlot.tscn")
 const COLUMNS := 4
 const ROWS := 5
+const TAPS_REQUIRED := 5      # 小虫害驱赶所需连击次数
+const TAP_WINDOW_SEC := 1.5   # 连击间隔窗口（超过则进度清零）
 
 var _plots: Array[FarmPlot] = []
 var _plot_ids: Array[String] = []
 
 # 小虫害寄生目标：plot_id -> { "pest_id": String, "ready_at_unix": float }
 var _pest_targets: Dictionary = {}
+# 小虫害连击进度：plot_id -> { "count": int, "last_tap_unix": float }
+var _pest_taps: Dictionary = {}
 var _pest_timer: Timer = null
 
 @onready var _grid: GridContainer = %Grid
@@ -40,13 +44,34 @@ func _on_plot_clicked(plot: FarmPlot) -> void:
 	var idx := _plots.find(plot)
 	if idx < 0:
 		return
-	# 点击有虫害的地块 = 驱赶（而非选中）
+	# 点击有虫害的地块 = 连击驱赶（而非选中）
 	var pid := _plot_ids[idx] if idx < _plot_ids.size() else ""
 	if pid != "" and _pest_targets.has(pid):
-		var t: Dictionary = _pest_targets[pid]
-		pest_drive_away_requested.emit(str(t.get("pest_id", "")), pid)
+		_register_pest_tap(pid)
 		return
 	select_index(idx)
+
+
+## 小虫害连击驱赶：每次点击计数，间隔超窗清零，达到阈值发驱赶请求。
+func _register_pest_tap(plot_id: String) -> void:
+	var now := Time.get_unix_time_from_system()
+	var t: Dictionary = _pest_taps.get(plot_id, { "count": 0, "last_tap_unix": 0.0 })
+	if now - float(t.get("last_tap_unix", 0.0)) > TAP_WINDOW_SEC:
+		t["count"] = 0
+	t["count"] = int(t.get("count", 0)) + 1
+	t["last_tap_unix"] = now
+	_pest_taps[plot_id] = t
+	Sfx.play("tap")
+	var idx := _plot_ids.find(plot_id)
+	if idx >= 0:
+		_plots[idx].pulse_pest()
+		_plots[idx].set_pest_tap_progress(int(t["count"]), TAPS_REQUIRED)
+	if int(t["count"]) >= TAPS_REQUIRED:
+		_pest_taps.erase(plot_id)
+		if idx >= 0:
+			_plots[idx].set_pest_tap_progress(0, TAPS_REQUIRED)
+		var pest_id := str(_pest_targets[plot_id].get("pest_id", ""))
+		pest_drive_away_requested.emit(pest_id, plot_id)
 
 
 func select_index(index: int) -> void:
@@ -188,11 +213,13 @@ func apply_pest_destroyed(payload: Dictionary) -> void:
 	for t in payload.get("targets", []):
 		var d: Dictionary = t
 		_pest_targets.erase(str(d.get("plot_id", "")))
+		_pest_taps.erase(str(d.get("plot_id", "")))
 	_refresh_pest_plots()
 
 
 func remove_pest_target(plot_id: String) -> void:
 	_pest_targets.erase(plot_id)
+	_pest_taps.erase(plot_id)
 	_refresh_pest_plots()
 
 
@@ -202,6 +229,7 @@ func is_pest_target(plot_id: String) -> bool:
 
 func _clear_pest_targets() -> void:
 	_pest_targets.clear()
+	_pest_taps.clear()
 	_refresh_pest_plots()
 
 
@@ -216,6 +244,7 @@ func _add_pest_target(plot_id: String, pest_id: String, remaining: float) -> voi
 
 
 ## 每秒刷新地块倒计时显示；到点发 pest_expired（服务端已摧毁作物，等待刷新）。
+## 连击间隔超窗：进度清零。
 func _tick_pest() -> void:
 	var now := Time.get_unix_time_from_system()
 	var expired: Array[String] = []
@@ -225,7 +254,18 @@ func _tick_pest() -> void:
 			expired.append(str(plot_id))
 	for plot_id in expired:
 		_pest_targets.erase(plot_id)
+		_pest_taps.erase(plot_id)
 		pest_expired.emit(plot_id)
+	var stale: Array[String] = []
+	for plot_id in _pest_taps.keys():
+		var t: Dictionary = _pest_taps[plot_id]
+		if now - float(t.get("last_tap_unix", 0.0)) > TAP_WINDOW_SEC:
+			stale.append(str(plot_id))
+	for plot_id in stale:
+		_pest_taps.erase(plot_id)
+		var idx := _plot_ids.find(plot_id)
+		if idx >= 0:
+			_plots[idx].set_pest_tap_progress(0, TAPS_REQUIRED)
 	if not expired.is_empty():
 		_refresh_pest_plots()
 
@@ -238,3 +278,19 @@ func _refresh_pest_plots() -> void:
 		if _pest_targets.has(pid):
 			rem = int(maxf(0.0, float(_pest_targets[pid]["ready_at_unix"]) - now))
 		_plots[i].set_pest_countdown(rem)
+
+
+## ---------------- 大虫害音游辅助 ----------------
+
+## 音游：地块全局矩形（命中测试与光环定位用）。
+func get_plot_global_rect(index: int) -> Rect2:
+	return _plots[index].get_global_rect()
+
+
+## 音游：可攻击地块索引（非锁定）。
+func get_attackable_plot_indices() -> Array[int]:
+	var out: Array[int] = []
+	for i in _plots.size():
+		if _plots[i].state != FarmPlot.PlotState.LOCKED:
+			out.append(i)
+	return out

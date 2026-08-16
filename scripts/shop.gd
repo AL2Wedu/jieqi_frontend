@@ -9,6 +9,7 @@ signal opened  # 打开完成（加载动画结束、内容可见）
 const LOAD_SECONDS := 4.0   # 加载动画时长（3-5s 区间）
 const FADE_SECONDS := 0.6   # 加载页淡出时长
 const WALK_IN_SECONDS := 2.6  # 动物从远处走近动画时长
+const WALK_IN_DROP := 190.0   # 起点在最终位置上方多少像素（远处）
 
 ## 商店动物（情绪为开心）；进入商店随机挑一只走入。
 const ANIMALS := ["乌鸦", "企鹅", "兔", "刺猬", "松鼠", "浣熊", "熊", "熊猫", "牛", "狐狸",
@@ -24,12 +25,14 @@ const ANIMALS := ["乌鸦", "企鹅", "兔", "刺猬", "松鼠", "浣熊", "熊"
 
 var _busy := false  # 加载动画播放中（开或关），避免并发
 var _walk_tween: Tween = null
+var _walk_final_pos := Vector2.ZERO  # 动物最终位置（场景中定义，_ready 时记录）
 
 
 func _ready() -> void:
 	_close.pressed.connect(close)
 	_load_bar.value_changed.connect(func(v: float) -> void: _load_pct.text = "%d%%" % int(round(v)))
 	_loading.visible = false
+	_walk_final_pos = _animal.position
 
 
 ## 打开商店：先播放加载动画，淡出后露出商店。
@@ -38,6 +41,7 @@ func open() -> void:
 		return
 	visible = true
 	_show_content()
+	_reset_walk_in()
 	_busy = true
 	await _play_loading("商 店", "咻地一下冲向商店！")
 	_busy = false
@@ -106,16 +110,26 @@ func _fade_loading() -> void:
 	_loading.visible = false
 
 
-## 随机一只动物从远处走近：初始透明且小（远景），逐渐变清晰、变大（近景）。
+## 动物回到起点状态（上方远处、透明、微小、隐藏），避免加载淡出时闪现。
+func _reset_walk_in() -> void:
+	_animal.position = _walk_final_pos - Vector2(0, WALK_IN_DROP)
+	_animal.modulate.a = 0.0
+	_animal.scale = Vector2(0.12, 0.12)
+	_animal.visible = false
+
+
+## 随机一只动物从上方远处走近：起点在上方、透明且小（远景），
+## 滑动到最终位置的同时变清晰、变大（近景）。
 ## 素材从后端 /v1/assets/animals/ 实时获取（情绪：开心；进入商店随机挑一只）。
 func _play_walk_in() -> void:
 	var name: String = ANIMALS.pick_random()
-	var url := "%s/v1/assets/animals/开心/%s.png" % [Backend.base_url, name.uri_encode()]
+	var url := "%s/v1/assets/animals/%s/%s.png" % [Backend.base_url, "开心".uri_encode(), name.uri_encode()]
 	var tex: Texture2D = await Backend.fetch_texture(url)
 	if tex == null:
 		return  # 素材拉不到则静默跳过动画
 	_animal.texture = tex
 	_animal.pivot_offset = Vector2(_animal.size.x / 2.0, _animal.size.y)  # 以脚底为中心放大
+	_animal.position = _walk_final_pos - Vector2(0, WALK_IN_DROP)
 	_animal.modulate.a = 0.0
 	_animal.scale = Vector2(0.12, 0.12)
 	_animal.visible = true
@@ -125,4 +139,6 @@ func _play_walk_in() -> void:
 	_walk_tween.tween_property(_animal, "modulate:a", 1.0, WALK_IN_SECONDS) \
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	_walk_tween.parallel().tween_property(_animal, "scale", Vector2.ONE, WALK_IN_SECONDS) \
+		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_walk_tween.parallel().tween_property(_animal, "position", _walk_final_pos, WALK_IN_SECONDS) \
 		.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)

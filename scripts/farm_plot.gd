@@ -18,6 +18,7 @@ var crop_key := ""  # 当前作物身份（<slug>|<stage>），用于检测地�
 @onready var _crop_label: Label = %CropLabel
 @onready var _lock_icon: TextureRect = %LockIcon
 @onready var _pest_bubble: PanelContainer = %PestBubble
+@onready var _pest_mark: Label = %PestMark
 @onready var _weed_icon: TextureRect = %WeedIcon
 @onready var _pest_countdown: PanelContainer = %PestCountdown
 @onready var _pest_countdown_label: Label = %PestCountdownLabel
@@ -41,6 +42,24 @@ func set_plot_state(new_state: int, crop_name: String = "") -> void:
 ## 是否显示“害虫”感叹号。
 func set_pest(has_pest: bool) -> void:
 	_pest_bubble.visible = has_pest
+	if not has_pest:
+		_pest_mark.text = "!"
+
+
+## 害虫驱赶连击进度：count 0 显示感叹号，>0 显示 "count/required"。
+func set_pest_tap_progress(count: int, required: int) -> void:
+	_pest_mark.text = "!" if count <= 0 else "%d/%d" % [count, required]
+
+
+## 点击反馈：害虫气泡轻微弹跳。
+func pulse_pest() -> void:
+	if not _pest_bubble.visible:
+		return
+	_pest_bubble.pivot_offset = _pest_bubble.size / 2.0
+	_pest_bubble.scale = Vector2(1.25, 1.25)
+	var tw := create_tween()
+	tw.tween_property(_pest_bubble, "scale", Vector2.ONE, 0.12) \
+		.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
 
 
 ## 是否显示杂草（该地块作物生长减速）。

@@ -21,6 +21,7 @@ config/quit_on_go_back_request=false
 
 Backend="*res://scripts/backend_client.gd"
 Music="*res://scripts/music_player.gd"
+Sfx="*res://scripts/sfx_player.gd"
 
 [display]
 

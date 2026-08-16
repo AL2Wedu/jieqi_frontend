@@ -86,7 +86,7 @@ grow_horizontal = 2
 grow_vertical = 2
 script = ExtResource("1_shop")
 
-[node name="Backdrop" type="ColorRect" parent="."]
+[node name="Backdrop" type="ColorRect" parent="." unique_id=584994291]
 unique_name_in_owner = true
 layout_mode = 1
 anchors_preset = 15
@@ -110,14 +110,14 @@ texture = ExtResource("3_scene")
 expand_mode = 1
 stretch_mode = 5
 
-[node name="AnimalWalkIn" type="TextureRect" parent="."]
+[node name="AnimalWalkIn" type="TextureRect" parent="." unique_id=99988668]
 unique_name_in_owner = true
 visible = false
 layout_mode = 0
 offset_left = 240.0
-offset_top = 180.0
+offset_top = 356.0
 offset_right = 480.0
-offset_bottom = 420.0
+offset_bottom = 596.0
 mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
@@ -133,7 +133,6 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("5_frame")
 expand_mode = 1
-stretch_mode = 0
 
 [node name="Basket" type="TextureRect" parent="." unique_id=799474741]
 unique_name_in_owner = true
@@ -291,7 +290,7 @@ theme_override_styles/background = SubResource("sb_load_bar_bg")
 theme_override_styles/fill = SubResource("sb_load_stripe")
 show_percentage = false
 
-[node name="Pct" type="Label" parent="LoadingOverlay/Center/Card/VBox"]
+[node name="Pct" type="Label" parent="LoadingOverlay/Center/Card/VBox" unique_id=1919914205]
 unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(1, 0.965, 0.871, 1)

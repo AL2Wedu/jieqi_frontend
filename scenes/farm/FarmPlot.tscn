@@ -118,6 +118,7 @@ mouse_filter = 2
 theme_override_styles/panel = SubResource("sb_bubble")
 
 [node name="PestMark" type="Label" parent="PestBubble"]
+unique_name_in_owner = true
 layout_mode = 2
 theme_override_colors/font_color = Color(0.85, 0.2, 0.2, 1)
 theme_override_font_sizes/font_size = 22

@@ -8,7 +8,7 @@ const CROP_PICKER := preload("res://scenes/CropPicker.tscn")
 const SHOP := preload("res://scenes/Shop.tscn")
 const STORAGE_PANEL := preload("res://scenes/farm/StoragePanel.tscn")
 const TOAST := preload("res://scenes/farm/Toast.tscn")
-const PEST_OVERLAY := preload("res://scenes/farm/PestOverlay.tscn")
+const PEST_RHYTHM := preload("res://scenes/farm/PestRhythmGame.tscn")
 const INVENTORY_PANEL := preload("res://scenes/farm/InventoryPanel.tscn")
 const QUESTS_PANEL := preload("res://scenes/farm/QuestsPanel.tscn")
 const ACHIEVEMENTS_PANEL := preload("res://scenes/farm/AchievementsPanel.tscn")
@@ -41,7 +41,7 @@ var _crop_picker: Control = null
 var _shop: Control = null
 var _storage_panel: Control = null
 var _toast_node: Control = null
-var _pest_overlay: Control = null
+var _rhythm_game: Control = null
 var _inventory_panel: Control = null
 var _quests_panel: Control = null
 var _achievements_panel: Control = null
@@ -68,11 +68,7 @@ func _ready() -> void:
 	_toast_node = TOAST.instantiate()
 	add_child(_toast_node)
 
-	# 虫害交互（驱赶确认 / 大虫害倒计时）
-	_pest_overlay = PEST_OVERLAY.instantiate()
-	add_child(_pest_overlay)
-	_pest_overlay.drive_away_confirmed.connect(_on_drive_away_confirmed)
-	_pest_overlay.auto_submit.connect(_on_pest_auto_submit)
+	# 虫害交互（小虫害连击驱赶；大虫害走音游，见下方 _rhythm_game）
 	_grid.pest_drive_away_requested.connect(_on_pest_drive_away_requested)
 	_grid.pest_expired.connect(_on_pest_expired)
 
@@ -128,6 +124,13 @@ func _ready() -> void:
 	_settings_panel.logged_out.connect(func() -> void:
 		back_to_menu_requested.emit.call_deferred())
 	_build_feature_rail()
+
+	# 大虫害音游覆盖层（最后挂载，覆盖所有面板）
+	_rhythm_game = PEST_RHYTHM.instantiate()
+	add_child(_rhythm_game)
+	_rhythm_game.setup(_grid)
+	_rhythm_game.submit_requested.connect(_on_rhythm_submit_requested)
+	_rhythm_game.finished.connect(_on_rhythm_finished)
 
 	_refresh_top_bar()
 	_grid.select_index(0)  # 同步高亮与逻辑选中（会触发 plot_selected → _on_plot_selected）
@@ -256,11 +259,32 @@ func _on_weed_growth(_payload: Dictionary) -> void:
 	await _after_operation()
 
 
-## WS：大虫害来袭（音游对抗，当前做最小化处理：倒计时后自动弃战）。
+## WS：大虫害来袭（音游对抗：害虫落地瞬间点击地块驱赶）。
 func _on_pest_big(payload: Dictionary) -> void:
-	if _pest_overlay != null:
-		_pest_overlay.show_big(payload)
-	_toast("大虫害来袭！自动驱赶中…")
+	if _rhythm_game != null and _rhythm_game.is_active():
+		return  # 重连/重复推送：已有进行中的音游
+	if _rhythm_game != null and _rhythm_game.start(payload):
+		# 音游覆盖全屏：先收起已打开的面板
+		if _shop != null and _shop.visible:
+			_shop.close()
+		for panel in [_settings_panel, _ai_chat_panel, _social_panel, _achievements_panel,
+				_quests_panel, _inventory_panel, _storage_panel, _crop_picker]:
+			if panel != null and panel.visible:
+				panel.visible = false
+		_toast("大虫害来袭！害虫落地瞬间点击地块驱赶！")
+	else:
+		_start_legacy_big(payload)
+
+
+## 无可攻击地块（全锁定）兜底：等满时长后提交弃战成绩。
+func _start_legacy_big(payload: Dictionary) -> void:
+	var pest_id := str(payload.get("pest_id", ""))
+	var duration := int(payload.get("duration_seconds", 30))
+	var elapsed := int(payload.get("elapsed_seconds", 0))
+	_toast("大虫害来袭！")
+	await get_tree().create_timer(maxf(0.0, duration - elapsed)).timeout
+	if is_instance_valid(self):
+		await _submit_pest_result(pest_id, 0, 100, 0)
 
 
 ## WS：小虫害寄生（地块倒计时，点击地块驱赶）。
@@ -276,26 +300,15 @@ func _on_pest_destroyed(payload: Dictionary) -> void:
 	await _after_operation()
 
 
-## 点击有虫害的地块 → 弹驱赶确认。
+## 小虫害连击达标：直接驱赶（POST /farm/pest/{id}/drive-away）。
 func _on_pest_drive_away_requested(pest_id: String, plot_id: String) -> void:
-	var crop_name := ""
-	for d in _plots_data:
-		if str(d.get("plot_id", "")) == plot_id:
-			var crop: Variant = d.get("crop")
-			if crop is Dictionary:
-				crop_name = str(crop.get("name", ""))
-			break
-	_pest_overlay.ask_drive_away(pest_id, plot_id, crop_name if crop_name != "" else "这块地")
-
-
-## 确认驱赶：POST /farm/pest/{id}/drive-away。
-func _on_drive_away_confirmed(pest_id: String, plot_id: String) -> void:
 	var res := await Backend.drive_away(pest_id, plot_id)
 	if not is_instance_valid(self):
 		return
 	if res.get("code", -1) == 0:
 		_grid.remove_pest_target(plot_id)
 		var destroyed: bool = bool(res["data"].get("destroyed", false))
+		Sfx.play("perfect")
 		_toast("驱赶成功！" if not destroyed else "来晚了，作物已被害虫毁坏")
 	else:
 		_toast(Backend.friendly_message(res, "驱赶失败"))
@@ -307,17 +320,18 @@ func _on_pest_expired(_plot_id: String) -> void:
 	await _after_operation()
 
 
-## 大虫害倒计时结束：自动提交弃战成绩（score 0 / max 100 / miss 0）。
-func _on_pest_auto_submit(pest_id: String) -> void:
-	var res := await Backend.submit_pest_result(pest_id, 0, 100, 0)
+## 大虫害成绩提交（音游/兜底共用）：TOO_FAST 3 秒重试、未达标惩罚、刷新。
+## 返回后端 data（空字典 = 提交失败）。
+func _submit_pest_result(pest_id: String, score: int, max_score: int, miss_count: int) -> Dictionary:
+	var res := await Backend.submit_pest_result(pest_id, score, max_score, miss_count)
 	if not is_instance_valid(self):
-		return
+		return {}
 	if res.get("code", -1) != 0:
 		if str(res.get("error_code", "")) == "PEST_RESULT_TOO_FAST":
 			await get_tree().create_timer(3.0).timeout
 			if is_instance_valid(self):
-				_on_pest_auto_submit(pest_id)
-		return
+				return await _submit_pest_result(pest_id, score, max_score, miss_count)
+		return {}
 	var data: Dictionary = res["data"]
 	if not data.get("passed", false) and data.has("pest_small"):
 		var penalty: Variant = data["pest_small"]
@@ -325,6 +339,19 @@ func _on_pest_auto_submit(pest_id: String) -> void:
 			_on_pest_small(penalty)  # 未达标 → 惩罚寄生小虫害
 	_toast("大虫害已处理")
 	await _after_operation()
+	return data
+
+
+## 音游结束：提交成绩并把结果回传结算面板。
+func _on_rhythm_submit_requested(pest_id: String, score: int, max_score: int, miss_count: int) -> void:
+	var data := await _submit_pest_result(pest_id, score, max_score, miss_count)
+	if is_instance_valid(_rhythm_game):
+		_rhythm_game.show_result(data)
+
+
+## 音游结算面板关闭：恢复 BGM。
+func _on_rhythm_finished() -> void:
+	Music.resume_after_loading()
 
 
 func _open_shop() -> void:
@@ -692,6 +719,10 @@ func _refresh_top_bar() -> void:
 ## 按 Esc / 安卓返回：先关最上层弹窗，再返回主菜单。
 func _unhandled_input(event: InputEvent) -> void:
 	if event.is_action_pressed("ui_cancel"):
+		# 音游特殊：进行中消费返回键（不退出），结算面板显示时关闭面板
+		if _rhythm_game != null and _rhythm_game.is_active():
+			_rhythm_game.handle_back()
+			return
 		# 商店特殊：带加载动画退出
 		if _shop != null and _shop.visible:
 			_shop.close()
@@ -708,6 +739,10 @@ func _unhandled_input(event: InputEvent) -> void:
 
 ## 安卓返回键：系统通知通路。返回 true = 已消费（有面板可关），false = 需退到主菜单。
 func handle_android_back() -> bool:
+	# 音游特殊：进行中消费返回键（不退出），结算面板显示时关闭面板
+	if _rhythm_game != null and _rhythm_game.is_active():
+		_rhythm_game.handle_back()
+		return true
 	# 商店特殊：带加载动画退出
 	if _shop != null and _shop.visible:
 		_shop.close()
