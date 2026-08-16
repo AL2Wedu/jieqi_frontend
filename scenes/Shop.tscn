@@ -215,7 +215,7 @@ layout_mode = 2
 theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
 theme_override_font_sizes/font_size = 18
 theme_override_styles/normal = SubResource("sb_btn_small")
-text = "赶客"
+text = "送客"
 
 [node name="Frame" type="TextureRect" parent="." unique_id=838434359]
 unique_name_in_owner = true
@@ -308,7 +308,7 @@ size_flags_horizontal = 3
 theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
 theme_override_font_sizes/font_size = 20
 theme_override_styles/normal = SubResource("sb_btn_small")
-text = "拒绝"
+text = "送客"
 
 [node name="SendButton" type="Button" parent="ActionBar" unique_id=2063179514]
 unique_name_in_owner = true

@@ -39,7 +39,7 @@ const ANIMALS := ["bear", "cat", "cat2", "chicken", "crow", "deer", "dog", "dog2
 var _busy := false  # 加载动画播放中（开或关），避免并发
 var _walk_tween: Tween = null
 var _walk_final_pos := Vector2.ZERO  # 动物最终位置（场景中定义，_ready 时记录）
-var _guest_session_id := ""  # AI 客人点菜会话（赶客/成交用；跨商店开关保持）
+var _guest_session_id := ""  # AI 客人点菜会话（送客/成交用；跨商店开关保持）
 var _order_items: Array = []  # AI 点单 [{crop_id, quantity}]
 var _order_total := 0  # AI 报的总价（服务端 confirm 时重算校验）
 var _shelf_items: Array[Dictionary] = []  # 货架物品
@@ -206,7 +206,7 @@ func _play_walk_in() -> void:
 
 
 ## 客人头顶对话气泡：自动开单（order 融合接口，AI 自动点单）显示需求。
-## 已有进行中的会话（上次没赶客）→ 直接取快照恢复。
+## 已有进行中的会话（上次没送客）→ 直接取快照恢复。
 func _show_guest_bubble(guest: Dictionary) -> void:
 	_guest_bubble.visible = true
 	_guest_text.text = "……"
@@ -230,7 +230,7 @@ func _show_guest_bubble(guest: Dictionary) -> void:
 	if not is_instance_valid(self):
 		return
 	if res.get("code", -1) != 0:
-		# 已有进行中的会话（上次没赶客）：错误里带 session_id，恢复会话供赶客/成交
+		# 已有进行中的会话（上次没送客）：错误里带 session_id，恢复会话供送客/成交
 		var busy_sid := str(res.get("data", {}).get("session_id", ""))
 		if busy_sid != "":
 			_guest_session_id = busy_sid
@@ -389,7 +389,7 @@ func _settle_summary(settle: Dictionary) -> String:
 	return "%s，共 %d 金币" % ["、".join(parts), total]
 
 
-## 拒绝/赶客：结束点菜会话（如有），客人淡出离开，10-20s 后新客人来。
+## 送客：结束点菜会话（如有），客人淡出离开，10-20s 后新客人来。
 func _on_reject() -> void:
 	if _guest_session_id != "":
 		var res := await Backend.order_cancel(_guest_session_id)
@@ -397,7 +397,7 @@ func _on_reject() -> void:
 		if not is_instance_valid(self):
 			return
 		if res.get("code", -1) != 0:
-			_guest_text.text = Backend.friendly_message(res, "赶客失败")
+			_guest_text.text = Backend.friendly_message(res, "送客失败")
 			return
 	_guest_bubble.visible = false
 	_confirm_button.visible = false
