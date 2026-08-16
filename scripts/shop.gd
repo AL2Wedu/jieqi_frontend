@@ -11,9 +11,11 @@ const FADE_SECONDS := 0.6   # 加载页淡出时长
 const WALK_IN_SECONDS := 2.6  # 动物从远处走近动画时长
 const WALK_IN_DROP := 190.0   # 起点在最终位置上方多少像素（远处）
 
-## 商店动物（情绪为开心）；进入商店随机挑一只走入。
-const ANIMALS := ["乌鸦", "企鹅", "兔", "刺猬", "松鼠", "浣熊", "熊", "熊猫", "牛", "狐狸",
-	"狗", "狗2", "狼", "猪", "猫", "猫2", "猫头鹰", "羊", "羊2", "老鼠", "青蛙", "马", "鸡", "鸭子", "鹿"]
+## 商店动物（情绪为 happy）；进入商店随机挑一只走入。
+## 素材走 /v1/assets/images/animals/{emotion}/{animal}.png?w=128（预渲染选档）。
+const ANIMALS := ["bear", "cat", "cat2", "chicken", "crow", "deer", "dog", "dog2",
+	"fox", "frog", "hedgehog", "horse", "mouse", "owl", "ox", "panda",
+	"penguin", "pig", "rabbit", "raccoon", "sheep", "sheep2", "squirrel", "wolf"]
 
 @onready var _title: Label = %Title
 @onready var _sub: Label = %Sub
@@ -120,10 +122,10 @@ func _reset_walk_in() -> void:
 
 ## 随机一只动物从上方远处走近：起点在上方、透明且小（远景），
 ## 滑动到最终位置的同时变清晰、变大（近景）。
-## 素材从后端 /v1/assets/animals/ 实时获取（情绪：开心；进入商店随机挑一只）。
+## 素材从后端 /v1/assets/images/animals/ 实时获取（情绪：happy；进入商店随机挑一只）。
 func _play_walk_in() -> void:
 	var name: String = ANIMALS.pick_random()
-	var url := "%s/v1/assets/animals/%s/%s.png" % [Backend.base_url, "开心".uri_encode(), name.uri_encode()]
+	var url := "%s/v1/assets/images/animals/happy/%s.png?w=128" % [Backend.base_url, name]
 	var tex: Texture2D = await Backend.fetch_texture(url)
 	if tex == null:
 		return  # 素材拉不到则静默跳过动画
