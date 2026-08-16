@@ -465,6 +465,9 @@ func _on_plot_selected(index: int) -> void:
 		var crop_data: Variant = d.get("crop")
 		if crop_data is Dictionary:
 			water_level = int(crop_data.get("water_level", 0))
+		else:
+			# 空地块：显示土壤湿度（按土质），而非作物水分 0（误导）
+			water_level = clampi(30 + soil * 15, 15, 90)
 		_status.set_stats(fertility, water_level, 80)
 	else:
 		# 本地演示兜底
