@@ -1,13 +1,16 @@
 extends Control
-## 背包面板（只读）：列出背包道具与数量。
+## 背包面板：列出背包道具与数量；选择模式（补货用）下点击道具发出 item_selected。
 ## 数据来源 GET /v1/player/inventory → { items:[{item_id, code, name, category, quantity, effect}] }。
 
 signal close_requested
+signal item_selected(item: Dictionary)
 
 @onready var _item_list: VBoxContainer = %ItemList
 @onready var _hint: Label = %Hint
 @onready var _close: Button = %CloseButton
 @onready var _dim: ColorRect = %Dim
+
+var _select_mode := false
 
 
 func _ready() -> void:
@@ -18,6 +21,16 @@ func _ready() -> void:
 
 ## 打开面板并拉取背包。
 func open() -> void:
+	_select_mode = false
+	visible = true
+	_hint.visible = true
+	_hint.text = "加载中…"
+	await _refresh()
+
+
+## 选择模式打开（补货用）：点击道具行发出 item_selected 并关闭。
+func open_for_select() -> void:
+	_select_mode = true
 	visible = true
 	_hint.visible = true
 	_hint.text = "加载中…"
@@ -41,7 +54,7 @@ func _refresh() -> void:
 		if qty <= 0:
 			continue  # 隐藏数量为 0 的行
 		has_any = true
-		_add_row(str(d.get("name", "?")), qty, str(d.get("category", "")))
+		_add_row(d, str(d.get("name", "?")), qty, str(d.get("category", "")))
 	if not has_any:
 		_hint.visible = true
 		_hint.text = "背包空空的，去商店买些种子吧～"
@@ -53,9 +66,32 @@ func _clear_list() -> void:
 		child.queue_free()
 
 
-func _add_row(name: String, qty: int, category: String) -> void:
+func _add_row(item: Dictionary, name: String, qty: int, category: String) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 8)
+	if _select_mode:
+		# 选择模式：整行可点，点击发出 item_selected
+		var btn := Button.new()
+		btn.custom_minimum_size = Vector2(0, 44)
+		btn.focus_mode = Control.FOCUS_NONE
+		btn.add_theme_font_size_override("font_size", 18)
+		btn.add_theme_color_override("font_color", Color(0.42, 0.3, 0.15))
+		var sb := StyleBoxFlat.new()
+		sb.bg_color = Color(0.85, 0.68, 0.4, 1)
+		sb.set_corner_radius_all(12)
+		sb.border_width_left = 3
+		sb.border_width_top = 3
+		sb.border_width_right = 3
+		sb.border_width_bottom = 3
+		sb.border_color = Color(0.478, 0.322, 0.188, 1)
+		btn.add_theme_stylebox_override("normal", sb)
+		btn.add_theme_stylebox_override("focus", StyleBoxEmpty.new())
+		btn.text = "%s · ×%d" % [name, qty]
+		btn.pressed.connect(func() -> void:
+			item_selected.emit(item)
+			hide())
+		_item_list.add_child(btn)
+		return
 	var cat := Label.new()
 	cat.text = "[%s]" % category
 	cat.custom_minimum_size = Vector2(110, 0)

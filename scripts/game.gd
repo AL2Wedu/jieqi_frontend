@@ -192,6 +192,9 @@ func _after_operation() -> void:
 		_on_plot_selected(_selected_index)
 	var me := await Backend.get_player_me()
 	if me.get("code", -1) == 0:
+		# 同步更新 Backend.player 缓存（操作后经验/等级变化，播种解锁等消费方依赖新鲜数据）
+		Backend.player = me["data"]
+		Backend.save_local()
 		_gold = int(me["data"].get("coins", 0))
 		_level = int(me["data"].get("level", 1))
 		_exp = int(me["data"].get("exp", 0))

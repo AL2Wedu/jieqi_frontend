@@ -1,9 +1,10 @@
 extends Control
-## 收成仓面板：列出仓内作物数量与当前收购价，支持出售。
+## 收成仓面板：列出仓内作物数量与当前收购价，支持出售；选择模式（补货用）下点选发出 item_selected。
 ## 数据来源 GET /v1/shop/storage → { season, items:[{crop_id, name, quantity, sell_price, season}] }。
 
 signal close_requested
 signal assets_changed
+signal item_selected(item: Dictionary)
 
 @onready var _season_label: Label = %SeasonLabel
 @onready var _item_list: ItemList = %ItemList
@@ -20,6 +21,7 @@ var _crop_names: Array[String] = []
 var _quantities: Array[int] = []
 var _prices: Array[int] = []
 var _selected := -1
+var _select_mode := false
 
 
 func _ready() -> void:
@@ -36,10 +38,24 @@ func open() -> void:
 	# 防御：节点未初始化完（onready 未赋值）时直接返回，避免空指针。
 	if _item_list == null or _hint == null or _season_label == null:
 		return
+	_select_mode = false
 	visible = true
 	_item_list.clear()
 	_selected = -1
 	_update_sell_ui()
+	_hint.text = "加载中…"
+	_hint.visible = true
+	await _refresh()
+
+
+## 选择模式打开（补货用）：点选作物行发出 item_selected 并关闭。
+func open_for_select() -> void:
+	if _item_list == null or _hint == null or _season_label == null:
+		return
+	_select_mode = true
+	visible = true
+	_item_list.clear()
+	_selected = -1
 	_hint.text = "加载中…"
 	_hint.visible = true
 	await _refresh()
@@ -84,6 +100,17 @@ func _refresh() -> void:
 
 func _on_item_selected(index: int) -> void:
 	_selected = index
+	if _select_mode:
+		# 选择模式：点选即发出 item_selected 并关闭
+		if index >= 0 and index < _crop_ids.size():
+			item_selected.emit({
+				"crop_id": _crop_ids[index],
+				"name": _crop_names[index],
+				"quantity": _quantities[index],
+				"sell_price": _prices[index],
+			})
+			hide()
+		return
 	_update_sell_ui()
 
 

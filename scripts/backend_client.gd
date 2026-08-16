@@ -4,7 +4,7 @@ extends Node
 
 ## 服务器地址：桌面调试默认本机。真机（Android）请改成电脑/服务器的局域网 IP，
 ## 或用环境变量 JIEQI_SERVER 覆盖（adb / 导出时注入）。
-var base_url := "http://127.0.0.1:8000"
+var base_url := "http://172.16.32.213:8000"
 var api := ""
 var ws_url := ""
 
@@ -13,6 +13,7 @@ const ART_VERSION_FILE := "user://art_version.json"
 const ASSET_VERSION_FILE := "user://asset_version.json"
 const SETTINGS_FILE := "user://settings.json"
 const REQUEST_TIMEOUT := 10
+const GUEST_CHAT_TIMEOUT := 60.0  # 客人聊天要调 AI（上游最长 20s + 重试），给足超时
 const TERM_POLL_SECONDS := 20.0
 const WS_PING_SECONDS := 30.0
 const APP_VERSION := "1.0.0"
@@ -149,9 +150,9 @@ func _process(_delta: float) -> void:
 
 ## 发起请求，返回响应信封 Dictionary（code/message/data）。
 ## 网络失败返回 {code:-1, message:"无法连接服务器"}。
-func request(method: String, path: String, body: Variant = {}, authed := true) -> Dictionary:
+func request(method: String, path: String, body: Variant = {}, authed := true, timeout := REQUEST_TIMEOUT) -> Dictionary:
 	var req := HTTPRequest.new()
-	req.timeout = REQUEST_TIMEOUT
+	req.timeout = timeout
 	add_child(req)
 	var url := api + path
 	var headers := PackedStringArray(["Content-Type: application/json"])
@@ -180,7 +181,10 @@ func request(method: String, path: String, body: Variant = {}, authed := true) -
 	var status: int = response[1]
 	var response_body: PackedByteArray = response[3]
 	if result != HTTPRequest.RESULT_SUCCESS:
+		print("[request] 网络失败 url=", url, " method=", method, " result=", result)
 		return { "code": -1, "message": "无法连接服务器" }
+	if path.contains("guest"):
+		print("[request] ", method, " ", path, " → HTTP ", status, " ", response_body.get_string_from_utf8().left(200))
 	if status < 200 or status >= 300:
 		# 业务错误也走 JSON 信封
 		var data: Variant = JSON.parse_string(response_body.get_string_from_utf8())
@@ -232,6 +236,7 @@ func _download_png(url: String) -> PackedByteArray:
 	var response: Array = await req.request_completed
 	req.queue_free()
 	if response[0] != HTTPRequest.RESULT_SUCCESS or response[1] != 200:
+		print("[download] 失败 url=", url, " result=", response[0], " status=", response[1])
 		return PackedByteArray()
 	var body: PackedByteArray = response[3]
 	if body.size() == 0:
@@ -388,6 +393,84 @@ func get_shop_state() -> Dictionary:
 ## 出售收成仓作物（按当前季节/分类收购价结算）。
 func sell_crop(crop_id: String, quantity: int) -> Dictionary:
 	return await request("POST", "/shop/crops/%s/sell" % crop_id, { "quantity": quantity })
+
+
+## ---------------- AI 客人（议价出售） ----------------
+
+## 遇到一位随机客人（名称+头像），买卖完成前锁定同一位。
+func guest_encounter() -> Dictionary:
+	var res := await request("GET", "/shop/guest/encounter")
+	print("[guest] encounter → ", res)
+	return res
+
+
+## 开一单 AI 客人议价（1 份收成），返回会话快照。
+func guest_start(crop_id: String) -> Dictionary:
+	var res := await request("POST", "/shop/guest/start", { "crop_id": crop_id })
+	print("[guest] start → ", res)
+	return res
+
+
+## 跟客人对话一轮；deal=true 当场成交结算。聊天要调 AI，超时给足（60s）。
+func guest_chat(session_id: String, message: String) -> Dictionary:
+	var res := await request("POST", "/shop/guest/%s/chat" % session_id, { "message": message }, true, GUEST_CHAT_TIMEOUT)
+	print("[guest] chat → ", res)
+	return res
+
+
+## 接受客人当前报价 → 成交结算。
+func guest_accept(session_id: String) -> Dictionary:
+	var res := await request("POST", "/shop/guest/%s/accept" % session_id)
+	print("[guest] accept → ", res)
+	return res
+
+
+## 赶客放弃 → 不成交，结束会话。
+func guest_cancel(session_id: String) -> Dictionary:
+	var res := await request("POST", "/shop/guest/%s/cancel" % session_id)
+	print("[guest] cancel → ", res)
+	return res
+
+
+## 会话快照（含全部消息历史），断线重进用。
+func guest_snapshot(session_id: String) -> Dictionary:
+	var res := await request("GET", "/shop/guest/%s" % session_id)
+	print("[guest] snapshot → ", res)
+	return res
+
+
+## ---------------- AI 客人点菜（order） ----------------
+
+## 融合接口：无 session_id → 自动创建会话 + AI 点单（返回含 session_id）；
+## 带 session_id → 多轮对话。聊天要调 AI，超时给足（60s）。
+func order_chat(session_id: String, message: String) -> Dictionary:
+	var res := await request("POST", "/shop/order/chat",
+		{ "message": message, "session_id": session_id if session_id != "" else null },
+		true, GUEST_CHAT_TIMEOUT)
+	print("[order] chat → ", res)
+	return res
+
+
+## 玩家确认成交：items 为 [{crop_id, quantity}]，total_price 服务端重算校验。
+func order_confirm(session_id: String, items: Array, total_price: int) -> Dictionary:
+	var res := await request("POST", "/shop/order/%s/confirm" % session_id,
+		{ "items": items, "total_price": total_price })
+	print("[order] confirm → ", res)
+	return res
+
+
+## 取消点菜会话（赶客）。
+func order_cancel(session_id: String) -> Dictionary:
+	var res := await request("POST", "/shop/order/%s/cancel" % session_id)
+	print("[order] cancel → ", res)
+	return res
+
+
+## 点菜会话快照（含消息历史），断线重进用。
+func order_snapshot(session_id: String) -> Dictionary:
+	var res := await request("GET", "/shop/order/%s" % session_id)
+	print("[order] snapshot → ", res)
+	return res
 
 
 ## ---------------- 任务 / 成就 ----------------

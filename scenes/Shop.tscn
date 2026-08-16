@@ -10,6 +10,56 @@
 [ext_resource type="Texture2D" uid="uid://bjx0nn1pj3nwl" path="res://assets/ui/shop/添加按钮.png" id="10_add"]
 [ext_resource type="Texture2D" uid="uid://ddyxoigb2nm8j" path="res://assets/icons/resource_coin.png" id="12_coin"]
 
+[sub_resource type="StyleBoxFlat" id="sb_guest_bubble"]
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 0.965, 0.871, 0.97)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.31, 0.2, 0.11, 0.3)
+shadow_size = 5
+
+[sub_resource type="StyleBoxFlat" id="sb_btn_small"]
+content_margin_top = 6.0
+content_margin_bottom = 6.0
+bg_color = Color(0.85, 0.68, 0.4, 1)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.478, 0.322, 0.188, 1)
+corner_radius_top_left = 14
+corner_radius_top_right = 14
+corner_radius_bottom_right = 14
+corner_radius_bottom_left = 14
+
+[sub_resource type="StyleBoxFlat" id="sb_ui_area"]
+content_margin_left = 12.0
+content_margin_top = 10.0
+content_margin_right = 12.0
+content_margin_bottom = 10.0
+bg_color = Color(1, 0.965, 0.871, 0.95)
+border_width_left = 3
+border_width_top = 3
+border_width_right = 3
+border_width_bottom = 3
+border_color = Color(0.784, 0.604, 0.373, 1)
+corner_radius_top_left = 18
+corner_radius_top_right = 18
+corner_radius_bottom_right = 18
+corner_radius_bottom_left = 18
+shadow_color = Color(0.31, 0.2, 0.11, 0.3)
+shadow_size = 5
+
 [sub_resource type="StyleBoxFlat" id="sb_coin_bar"]
 content_margin_left = 18.0
 content_margin_top = 6.0
@@ -122,6 +172,51 @@ mouse_filter = 2
 expand_mode = 1
 stretch_mode = 5
 
+[node name="GuestBubble" type="PanelContainer" parent="." unique_id=1505235712]
+unique_name_in_owner = true
+visible = false
+layout_mode = 0
+offset_left = 170.0
+offset_top = 240.0
+offset_right = 550.0
+offset_bottom = 350.0
+theme_override_styles/panel = SubResource("sb_guest_bubble")
+
+[node name="VBox" type="VBoxContainer" parent="GuestBubble" unique_id=2082502132]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="GuestText" type="Label" parent="GuestBubble/VBox" unique_id=598296842]
+unique_name_in_owner = true
+layout_mode = 2
+theme_override_colors/font_color = Color(0.36, 0.25, 0.13, 1)
+theme_override_font_sizes/font_size = 18
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="GuestButtons" type="HBoxContainer" parent="GuestBubble/VBox" unique_id=2143901068]
+layout_mode = 2
+alignment = 1
+
+[node name="ConfirmButton" type="Button" parent="GuestBubble/VBox/GuestButtons" unique_id=499938713]
+unique_name_in_owner = true
+visible = false
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("sb_btn_small")
+text = "成交"
+
+[node name="CancelButton" type="Button" parent="GuestBubble/VBox/GuestButtons" unique_id=499938712]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(100, 40)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 18
+theme_override_styles/normal = SubResource("sb_btn_small")
+text = "赶客"
+
 [node name="Frame" type="TextureRect" parent="." unique_id=838434359]
 unique_name_in_owner = true
 layout_mode = 1
@@ -133,6 +228,118 @@ grow_vertical = 2
 mouse_filter = 2
 texture = ExtResource("5_frame")
 expand_mode = 1
+
+[node name="ShelfArea" type="PanelContainer" parent="." unique_id=336147726]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 39.0
+offset_top = 639.0
+offset_right = 350.0
+offset_bottom = 963.0
+theme_override_styles/panel = SubResource("sb_ui_area")
+
+[node name="ShelfVBox" type="VBoxContainer" parent="ShelfArea" unique_id=735000579]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ShelfTitle" type="Label" parent="ShelfArea/ShelfVBox" unique_id=1175120093]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 22
+text = "货架"
+horizontal_alignment = 1
+
+[node name="ShelfList" type="VBoxContainer" parent="ShelfArea/ShelfVBox" unique_id=474640278]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="BasketArea" type="PanelContainer" parent="." unique_id=749332991]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 370.0
+offset_top = 640.0
+offset_right = 681.0
+offset_bottom = 964.0
+theme_override_styles/panel = SubResource("sb_ui_area")
+
+[node name="BasketVBox" type="VBoxContainer" parent="BasketArea" unique_id=1617604839]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="BasketTitle" type="Label" parent="BasketArea/BasketVBox" unique_id=13243647]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 22
+text = "菜篮"
+horizontal_alignment = 1
+
+[node name="BasketList" type="VBoxContainer" parent="BasketArea/BasketVBox" unique_id=1271012263]
+unique_name_in_owner = true
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 6
+
+[node name="ActionBar" type="HBoxContainer" parent="." unique_id=1901109760]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 22.0
+offset_top = 996.0
+offset_right = 689.0
+offset_bottom = 1056.0
+theme_override_constants/separation = 10
+
+[node name="TakeButton" type="Button" parent="ActionBar" unique_id=1591749446]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_btn_small")
+text = "取货"
+
+[node name="RejectButton" type="Button" parent="ActionBar" unique_id=59684278]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_btn_small")
+text = "拒绝"
+
+[node name="SendButton" type="Button" parent="ActionBar" unique_id=2063179514]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_btn_small")
+text = "发送"
+
+[node name="RestockButton" type="Button" parent="ActionBar" unique_id=1031197977]
+unique_name_in_owner = true
+custom_minimum_size = Vector2(0, 56)
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 20
+theme_override_styles/normal = SubResource("sb_btn_small")
+text = "补货"
+
+[node name="InputBox" type="LineEdit" parent="." unique_id=1673078614]
+unique_name_in_owner = true
+layout_mode = 0
+offset_left = 72.0
+offset_top = 1117.0
+offset_right = 642.0
+offset_bottom = 1205.0
+theme_override_colors/font_color = Color(0.42, 0.3, 0.15, 1)
+theme_override_font_sizes/font_size = 20
+placeholder_text = "和客人说点什么…"
 
 [node name="Basket" type="TextureRect" parent="." unique_id=799474741]
 unique_name_in_owner = true

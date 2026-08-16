@@ -67,9 +67,9 @@ func _make_item_button(item: Dictionary, quote: Dictionary, term_index: int, lev
 	var suitable := _crop_suitable(quote.get("sow_window", {}), term_index)
 	var unlock_level := int(quote.get("unlock_level", 0))
 	var unlock_exp := int(quote.get("unlock_exp", 0))
-	var exp_ok := unlock_exp <= 0 or exp >= unlock_exp
-	var lvl_ok := unlock_level <= 0 or level >= unlock_level
-	var locked := not (exp_ok or lvl_ok)
+	# 后端 crop_quotes[].locked 是权威解锁状态（服务端用最新玩家数据算好）；
+	# 旧后端无此字段时回退本地计算（等级或经验任一达标，与后端 sow 校验一致）。
+	var locked := bool(quote.get("locked", _compute_locked(unlock_level, unlock_exp, level, exp)))
 	var sold_out := stock <= 0
 	var disabled := not suitable or locked or sold_out
 	btn.disabled = disabled
@@ -109,6 +109,13 @@ func _make_item_button(item: Dictionary, quote: Dictionary, term_index: int, lev
 	if not quote.is_empty():
 		_load_icon(btn, quote)
 	return btn
+
+
+## 解锁校验（与后端 farm_service.sow 一致）：等级或经验任一达标即解锁。
+func _compute_locked(unlock_level: int, unlock_exp: int, level: int, exp: int) -> bool:
+	var exp_ok := unlock_exp <= 0 or exp >= unlock_exp
+	var lvl_ok := unlock_level <= 0 or level >= unlock_level
+	return not (exp_ok or lvl_ok)
 
 
 ## 宜种校验（与后端 farm_service._check_sow_window 一致）。term_index 为 1-24。
